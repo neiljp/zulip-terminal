@@ -24,8 +24,6 @@ class Model:
         # Get message after registering to the queue.
         self.msg_view = None  # type: Any
         self.anchor = 0
-        self.num_before = 30
-        self.num_after = 10
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
         self.update = False
@@ -33,7 +31,7 @@ class Model:
         self.stream_dict = {}  # type: Dict[int, Any]
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
-        self.get_messages(first_anchor=True)
+        self.get_messages(first_anchor=True, before=30, after=10)
         self.initial_data = self.fetch_initial_data()
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
@@ -98,11 +96,17 @@ class Model:
             current_ids = self.index['search']
         return current_ids.copy()
 
-    def get_messages(self, *, first_anchor: bool) -> Any:
+    def get_messages(self, *, first_anchor: bool,
+                     before: int, after: int) -> Any:
+        """
+        Returns index, after fetching a range of messages around the anchor.
+        If first_anchor is True, the anchor is the next unread message, and
+        self.anchor is ignored.
+        """
         request = {
             'anchor': self.anchor,
-            'num_before': self.num_before,
-            'num_after': self.num_after,
+            'num_before': before,
+            'num_after': after,
             'apply_markdown': False,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
@@ -114,7 +118,7 @@ class Model:
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
                 self.index[str(self.narrow)] = response['anchor']
-            query_range = self.num_after + self.num_before + 1
+            query_range = after + before + 1
             if len(response['messages']) < (query_range):
                 self.update = True
             return self.index

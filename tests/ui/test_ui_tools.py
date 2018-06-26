@@ -58,9 +58,9 @@ class TestMessageView:
         msg_view.load_old_messages(0)
         assert msg_view.old_loading is False
         assert msg_view.model.anchor == 0
-        assert msg_view.model.num_after == 0
-        assert msg_view.model.num_before == 30
         assert msg_view.index == {}
+        self.model.get_messages.assert_called_once_with(first_anchor=False,
+                                                        before=30, after=0)
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.loop.draw_screen.assert_called_once_with()
 
@@ -74,9 +74,9 @@ class TestMessageView:
         msg_view.load_new_messages(0)
         assert msg_view.new_loading is False
         assert msg_view.model.anchor == 0
-        assert msg_view.model.num_after == 30
-        assert msg_view.model.num_before == 0
         assert msg_view.index == {}
+        self.model.get_messages.assert_called_once_with(first_anchor=False,
+                                                        before=0, after=30)
         msg_view.log.extend.assert_called_once_with(['M1', 'M2'])
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.loop.draw_screen.assert_called_once_with()
