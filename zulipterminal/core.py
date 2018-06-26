@@ -118,13 +118,14 @@ class Controller:
         msg_id_list = self.model.index['private'].get(frozenset(
             [self.model.user_id, button.user_id]), [])
 
-        if hasattr(button, 'message'):
-            self.model.anchor = button.message['id']
-            use_first_unread_anchor = False
-        elif len(msg_id_list) == 0:
-            use_first_unread_anchor = True
-        self.model.get_messages(first_anchor=use_first_unread_anchor,
-                                before=30, after=10)
+        if len(msg_id_list) == 0:
+            if hasattr(button, 'message'):
+                self.model.anchor = button.message['id']
+                use_first_unread_anchor = False
+            else:
+                use_first_unread_anchor = True
+            self.model.get_messages(first_anchor=use_first_unread_anchor,
+                                    before=30, after=10)
 
         recipients = frozenset([self.model.user_id, button.user_id])
         self.model.recipients = recipients
