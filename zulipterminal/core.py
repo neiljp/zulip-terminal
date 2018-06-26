@@ -33,8 +33,8 @@ class Controller:
         # Search for a text in messages
         self.update = False
         self.model.set_narrow(search=text)
-        self.model.anchor = 10000000000
-        self.model.get_messages(first_anchor=False, before=30, after=0)
+        self.model.get_messages(specified_anchor=10000000000,
+                                before=30, after=0)
         msg_id_list = self.model.index['search']
         w_list = create_msg_box_list(self.model, msg_id_list)
         self.model.msg_view.clear()
@@ -56,11 +56,10 @@ class Controller:
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
             if hasattr(button, 'message'):
-                self.model.anchor = button.message['id']
-                use_first_unread_anchor = False
+                specified_anchor = button.message['id']
             else:
-                use_first_unread_anchor = True
-            self.model.get_messages(first_anchor=use_first_unread_anchor,
+                specified_anchor = None
+            self.model.get_messages(specified_anchor=specified_anchor,
                                     before=30, after=10)
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         if hasattr(button, 'message'):
@@ -83,11 +82,10 @@ class Controller:
                                                     button.title, [])
         if len(msg_id_list) == 0:
             if hasattr(button, 'message'):
-                self.model.anchor = button.message['id']
-                use_first_unread_anchor = False
+                specified_anchor = button.message['id']
             else:
-                use_first_unread_anchor = True
-            self.model.get_messages(first_anchor=use_first_unread_anchor,
+                specified_anchor = None
+            self.model.get_messages(specified_anchor=specified_anchor,
                                     before=30, after=10)
             msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
@@ -120,11 +118,10 @@ class Controller:
 
         if len(msg_id_list) == 0:
             if hasattr(button, 'message'):
-                self.model.anchor = button.message['id']
-                use_first_unread_anchor = False
+                specified_anchor = button.message['id']
             else:
-                use_first_unread_anchor = True
-            self.model.get_messages(first_anchor=use_first_unread_anchor,
+                specified_anchor = None
+            self.model.get_messages(specified_anchor=specified_anchor,
                                     before=30, after=10)
 
         recipients = frozenset([self.model.user_id, button.user_id])
@@ -161,7 +158,7 @@ class Controller:
         self.update = False
         msg_list = self.model.index['all_private']
         if len(msg_list) == 0:
-            self.model.get_messages(first_anchor=True, before=30, after=10)
+            self.model.get_messages(specified_anchor=None, before=30, after=10)
             msg_list = self.model.index['all_private']
         w_list = create_msg_box_list(self.model, msg_list)
 

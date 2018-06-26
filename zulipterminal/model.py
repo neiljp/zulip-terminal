@@ -23,7 +23,6 @@ class Model:
         self.client = controller.client
         # Get message after registering to the queue.
         self.msg_view = None  # type: Any
-        self.anchor = 0
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
         self.update = False
@@ -31,7 +30,7 @@ class Model:
         self.stream_dict = {}  # type: Dict[int, Any]
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
-        self.get_messages(first_anchor=True, before=30, after=10)
+        self.get_messages(specified_anchor=None, before=30, after=10)
         self.initial_data = self.fetch_initial_data()
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
@@ -96,19 +95,18 @@ class Model:
             current_ids = self.index['search']
         return current_ids.copy()
 
-    def get_messages(self, *, first_anchor: bool,
+    def get_messages(self, *, specified_anchor: Optional[int],
                      before: int, after: int) -> Any:
         """
         Returns index, after fetching a range of messages around the anchor.
-        If first_anchor is True, the anchor is the next unread message, and
-        self.anchor is ignored.
+        If specified_anchor is None, the anchor is the next unread message.
         """
         request = {
-            'anchor': self.anchor,
+            'anchor': 0 if specified_anchor is None else specified_anchor,
             'num_before': before,
             'num_after': after,
             'apply_markdown': False,
-            'use_first_unread_anchor': first_anchor,
+            'use_first_unread_anchor': specified_anchor is None,
             'client_gravatar': False,
             'narrow': json.dumps(self.narrow),
         }
@@ -116,7 +114,7 @@ class Model:
                                             method="GET")
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
-            if first_anchor:
+            if specified_anchor is None:
                 self.index[str(self.narrow)] = response['anchor']
             query_range = after + before + 1
             if len(response['messages']) < (query_range):

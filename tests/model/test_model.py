@@ -36,7 +36,6 @@ class TestModel:
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.msg_view is None
-        assert model.anchor == 0
         assert model.msg_list is None
         assert model.narrow == []
         assert model.update is False
@@ -44,7 +43,7 @@ class TestModel:
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
         assert model.index is None
-        model.get_messages.assert_called_once_with(first_anchor=True,
+        model.get_messages.assert_called_once_with(specified_anchor=None,
                                                    before=30, after=10)
         model.fetch_initial_data.assert_called_once_with()
         assert model.initial_data == initial_data
@@ -180,7 +179,7 @@ class TestModel:
                      return_value=index_all_messages)
         model = Model(self.controller)
         request = {
-            'anchor': model.anchor,
+            'anchor': 0,
             'num_before': 30,  # XXX Factor out?
             'num_after': 10,   # XXX Factor out?
             'apply_markdown': False,
@@ -220,7 +219,8 @@ class TestModel:
 
         model = Model(self.controller)
         # XXX 40 and 50 should be factored out?
-        model.get_messages(first_anchor=False, before=40, after=50)
+        # XXX anchor=1 is just an arbitrary value; is one in a fixture?
+        model.get_messages(specified_anchor=1, before=40, after=50)
         self.client.do_api_query.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
@@ -228,7 +228,8 @@ class TestModel:
 
         # TEST `query_range` < no of messages received
         model.update = False  # RESET model.update value
-        model.get_messages(first_anchor=False, before=0, after=0)
+        # XXX anchor=1 is just an arbitrary value; is one in a fixture?
+        model.get_messages(specified_anchor=1, before=0, after=0)
         assert model.update is False
 
     def test_fail_get_messages(self, mocker, error_response,
@@ -248,7 +249,7 @@ class TestModel:
         self.client.do_api_query.return_value = error_response
         model = Model(self.controller)
         request = {
-            'anchor': model.anchor,
+            'anchor': 0,
             'num_before': 30,  # XXX Factor out?
             'num_after': 10,   # XXX Factor out?
             'apply_markdown': False,
