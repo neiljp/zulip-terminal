@@ -98,7 +98,7 @@ class Model:
             current_ids = self.index['search']
         return current_ids.copy()
 
-    def get_messages(self, first_anchor: bool) -> Any:
+    def get_messages(self, *, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,
             'num_before': self.num_before,
