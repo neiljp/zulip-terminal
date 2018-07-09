@@ -4,6 +4,8 @@ from functools import wraps
 from threading import Thread
 from typing import Any, Dict, List
 
+import pytest
+
 
 def async(func: Any) -> Any:
     """
@@ -11,6 +13,8 @@ def async(func: Any) -> Any:
     """
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
+        if hasattr(pytest, '_zulip_term_no_async'):
+            return func(*args, **kwargs)
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
         return thread.start()
