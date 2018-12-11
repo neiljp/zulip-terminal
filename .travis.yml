@@ -4,21 +4,33 @@ matrix:
   include:
     - python: 3.4
       name: "Python 3.4 pytest (default linux)"
+      env: ZT_PYTHON=3.4
     - python: 3.5
       name: "Python 3.5 pytest (default linux)"
+      env: ZT_PYTHON=3.5
     - python: 3.6
       name: "Python 3.6 pytest (default linux)"
+      env: ZT_PYTHON=3.6
     - python: 3.7
       name: "Python 3.7 pytest (ubuntu xenial)"
+      env: ZT_PYTHON=3.7
       dist: xenial
       sudo: true
     - python: 3.5
       name: 'Static type-checking (mypy, python 3.5)'
+      env: ZT_PYTHON=3.5
       script: pipenv run ./tools/run-mypy
       after_success: true
+    - os: osx
+      env: ZT_PYTHON=3
+      language: generic
+      name: "Python 3 pytest (default OSX)"
+before_install:
+  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python3 &>/dev/null || brew install python3; fi
 install:
   - pip install pipenv==11.10
-  - pipenv install --dev Pipfile
+  - pipenv --python $ZT_PYTHON install --dev Pipfile
 script:
   - pipenv run pytest
 after_success:
