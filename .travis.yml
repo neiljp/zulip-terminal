@@ -1,20 +1,26 @@
 language: python
-python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
+cache: pip
 matrix:
   include:
+    - python: 3.4
+      name: "Python 3.4 pytest (default linux)"
+    - python: 3.5
+      name: "Python 3.5 pytest (default linux)"
+    - python: 3.6
+      name: "Python 3.6 pytest (default linux)"
     - python: 3.7
+      name: "Python 3.7 pytest (ubuntu xenial)"
       dist: xenial
       sudo: true
+    - python: 3.4
+      name: 'Static type-checking (mypy, python 3.4)'
+      script: pipenv run ./tools/run-mypy
+      after_success: true
 install:
   - pip install pipenv==11.10
   - pipenv install --dev Pipfile
 script:
   - pipenv run pytest
-  - pipenv run pytest --pep8
-  - pipenv run ./tools/run-mypy
 after_success:
   - pip install codecov
   - codecov
