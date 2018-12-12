@@ -25,6 +25,46 @@ matrix:
       env: ZT_PYTHON=3
       language: generic
       name: "Python 3 pytest (default travis OSX)"
+    - python: 3.4
+      env: TOXENV=py34-test
+      install: pip install tox
+      script: tox
+    - python: 3.5
+      env: TOXENV=py35-test
+      install: pip install tox
+      script: tox
+    - python: 3.6
+      env: TOXENV=py36-test
+      install: pip install tox
+      script: tox
+    - python: 3.7
+      env: TOXENV=py37-test
+      install: pip install tox
+      script: tox
+      dist: xenial
+      sudo: true
+    - python: 3.5
+      env: TOXENV=mypy
+      install: pip install tox
+      script: tox
+    - python: 3.4
+      env: TOXENV=py34-install
+      install: pip install tox
+      script: tox
+    - python: 3.5
+      env: TOXENV=py35-install
+      install: pip install tox
+      script: tox
+    - python: 3.6
+      env: TOXENV=py36-install
+      install: pip install tox
+      script: tox
+    - python: 3.7
+      env: TOXENV=py37-install
+      install: pip install tox
+      script: tox
+      dist: xenial
+      sudo: true
 before_install:
   #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew list python3 &>/dev/null || brew install python3; fi
