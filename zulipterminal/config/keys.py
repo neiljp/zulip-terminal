@@ -77,6 +77,10 @@ KEY_BINDINGS = {
         'keys': {'S'},
         'help_text': 'Narrow to the topic of the current message',
     },
+    'TOGGLE_NARROW': {
+        'keys': {'z'},
+        'help_text': 'Narrow to a topic/private-chat, or back to stream/all-private-messages',
+    },
     'ALL_PM': {
         'keys': {'P'},
         'help_text': 'Narrow to all private messages',
