@@ -17,9 +17,9 @@ Index = TypedDict('Index', {
     'stream': Dict[int, Dict[str, Set[int]]],
     # {user_id, ...}: {message_id, ...}
     'private': Dict[FrozenSet[int], Set[int]],
-    'all_messages': Set[int],  # {message_id, ...}
-    'all_starred': Set[int],  # {message_id, ...}
-    'all_private': Set[int],  # {message_id, ...}
+    'all_msg_ids': Set[int],  # {message_id, ...}
+    'starred_msg_ids': Set[int],  # {message_id, ...}
+    'private_msg_ids': Set[int],  # {message_id, ...}
     'all_stream': Dict[int, Set[int]],  # stream_id: {message_id, ...}
     'edited_messages': Set[int],  # {message_ids, ...}
     'search': Set[int],  # {message_id, ...}
@@ -30,13 +30,13 @@ initial_index = Index(
     pointer=defaultdict(set),
     stream=defaultdict(dict),
     private=defaultdict(set),
-    all_messages=set(),
-    all_private=set(),
+    all_msg_ids=set(),
+    private_msg_ids=set(),
     all_stream=defaultdict(set),
     edited_messages=set(),
     messages=defaultdict(dict),
     search=set(),
-    all_starred=set(),
+    starred_msg_ids=set(),
 )
 
 
@@ -162,12 +162,12 @@ def index_messages(messages: List[Any],
                 32553,
             }
         },
-        'all_messages': {
+        'all_msg_ids': {
             14231,
             23423,
             ...
         },
-        'all_private': {
+        'private_msg_ids': {
             22334,
             23423,
             ...
@@ -258,7 +258,7 @@ def index_messages(messages: List[Any],
 
         index['messages'][msg['id']] = msg
         if not narrow:
-            index['all_messages'].add(msg['id'])
+            index['all_msg_ids'].add(msg['id'])
 
         elif narrow[0][0] == 'search':
             index['search'].add(msg['id'])
@@ -268,10 +268,10 @@ def index_messages(messages: List[Any],
 
             if narrow[0][1] == 'starred':
                 if 'starred' in msg['flags']:
-                    index['all_starred'].add(msg['id'])
+                    index['starred_msg_ids'].add(msg['id'])
 
             if msg['type'] == 'private':
-                index['all_private'].add(msg['id'])
+                index['private_msg_ids'].add(msg['id'])
                 recipients = frozenset(set(
                     recipient['id'] for recipient in msg['display_recipient']
                 ))
