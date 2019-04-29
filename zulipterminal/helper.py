@@ -14,13 +14,13 @@ Message = Dict[str, Any]
 Index = TypedDict('Index', {
     'pointer': Dict[str, Union[int, Set[None]]],  # narrow_str, message_id
     # stream_id: topic_str: {message_id, ...}
-    'stream': Dict[int, Dict[str, Set[int]]],
+    'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
     # {user_id, ...}: {message_id, ...}
-    'private': Dict[FrozenSet[int], Set[int]],
+    'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
     'all_msg_ids': Set[int],  # {message_id, ...}
     'starred_msg_ids': Set[int],  # {message_id, ...}
     'private_msg_ids': Set[int],  # {message_id, ...}
-    'all_stream': Dict[int, Set[int]],  # stream_id: {message_id, ...}
+    'stream_msg_ids_by_stream_id': Dict[int, Set[int]],  # stream_id: {message_id, ...}
     'edited_messages': Set[int],  # {message_ids, ...}
     'search': Set[int],  # {message_id, ...}
     'messages': Dict[int, Message],  # message_id: Message
@@ -28,11 +28,11 @@ Index = TypedDict('Index', {
 
 initial_index = Index(
     pointer=defaultdict(set),
-    stream=defaultdict(dict),
-    private=defaultdict(set),
+    topic_msg_ids=defaultdict(dict),
+    private_msg_ids_by_user_ids=defaultdict(set),
     all_msg_ids=set(),
     private_msg_ids=set(),
-    all_stream=defaultdict(set),
+    stream_msg_ids_by_stream_id=defaultdict(set),
     edited_messages=set(),
     messages=defaultdict(dict),
     search=set(),
@@ -143,7 +143,7 @@ def index_messages(messages: List[Any],
             '[["stream", "verona"]]': 32,
             ...
         }
-        'stream': {
+        'topic_msg_ids': {
             123: {    # stream_id
                 'topic name': {
                     51234,  # message id
@@ -151,7 +151,7 @@ def index_messages(messages: List[Any],
                     ...
                 }
         },
-        'private': {
+        'private_msg_ids_by_user_ids': {
             (3, 7): {  # user_ids frozenset
                 51234,
                 56454,
@@ -172,7 +172,7 @@ def index_messages(messages: List[Any],
             23423,
             ...
         },
-        'all_stream': {
+        'stream_msg_ids_by_stream_id': {
             123: {
                 53434,
                 36435,
@@ -281,17 +281,17 @@ def index_messages(messages: List[Any],
                                       for email in narrow[0][1].split(', ')] +
                                      [model.user_id])
                     if recipients == frozenset(narrow_emails):
-                        index['private'][recipients].add(msg['id'])
+                        index['private_msg_ids_by_user_ids'][recipients].add(msg['id'])
 
             if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
-                index['all_stream'][msg['stream_id']].add(msg['id'])
+                index['stream_msg_ids_by_stream_id'][msg['stream_id']].add(msg['id'])
 
         if msg['type'] == 'stream' and len(narrow) == 2 and\
                 narrow[1][1] == msg['subject']:
 
-            if not index['stream'][msg['stream_id']].get(msg['subject']):
-                index['stream'][msg['stream_id']][msg['subject']] = set()
-            index['stream'][msg['stream_id']][msg['subject']].add(msg['id'])
+            if not index['topic_msg_ids'][msg['stream_id']].get(msg['subject']):
+                index['topic_msg_ids'][msg['stream_id']][msg['subject']] = set()
+            index['topic_msg_ids'][msg['stream_id']][msg['subject']].add(msg['id'])
 
     return index
 

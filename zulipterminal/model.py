@@ -164,15 +164,15 @@ class Model:
         elif narrow[0][0] == 'stream':
             stream_id = self.stream_id
             if len(narrow) == 1:
-                current_ids = self.index['all_stream'][stream_id]
+                current_ids = self.index['stream_msg_ids_by_stream_id'][stream_id]
             elif len(narrow) == 2:
                 topic = narrow[1][1]
-                current_ids = self.index['stream'][stream_id].get(topic, set())
+                current_ids = self.index['topic_msg_ids'][stream_id].get(topic, set())
         elif narrow[0][1] == 'private':
             current_ids = self.index['private_msg_ids']
         elif narrow[0][0] == 'pm_with':
             recipients = self.recipients
-            current_ids = self.index['private'].get(recipients, set())
+            current_ids = self.index['private_msg_ids_by_user_ids'].get(recipients, set())
         elif narrow[0][0] == 'search':
             current_ids = self.index['search']
         elif narrow[0][1] == 'starred':
