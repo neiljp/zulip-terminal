@@ -7,6 +7,7 @@ name = "pypi"
 typing = {version="==3.6.4", markers="python_version < '3.5'"}
 urwid = "==2.0.1"
 requests = {version="==2.21", markers="python_version < '3.5'"}
+requests = {version=">2.21", markers="python_version >= '3.5'"}
 zulip = "==0.5.9"
 emoji = "==0.5.0"
 urwid-readline = "==0.8"
