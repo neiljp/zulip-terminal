@@ -544,35 +544,32 @@ class TestModel:
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
 
-    @pytest.mark.parametrize('response, narrow, recipients, log', [
-        ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
+    @pytest.mark.parametrize('response, narrow, log', [
+        ({'type': 'stream', 'id': 1}, [], ['msg_w']),
         ({'type': 'private', 'id': 1},
-         [['is', 'private']], frozenset(), ['msg_w']),
+         [['is', 'private']], ['msg_w']),
         ({'type': 'stream', 'id': 1, 'display_recipient': 'a'},
-         [['stream', 'a']], frozenset(), ['msg_w']),
+         [['stream', 'a']], ['msg_w']),
         ({'type': 'stream', 'id': 1, 'subject': 'b',
           'display_recipient': 'a'},
-         [['stream', 'a'], ['topic', 'b']],
-         frozenset(), ['msg_w']),
+          [['stream', 'a'], ['topic', 'b']], ['msg_w']),
         ({'type': 'stream', 'id': 1, 'subject': 'b',
           'display_recipient': 'a'},
-         [['stream', 'c'], ['topic', 'b']],
-         frozenset(), []),
+         [['stream', 'c'], ['topic', 'b']], []),
+        ({'type': 'private', 'id': 1,
+         'display_recipient': [{'id': 5827}, {'id': 5}]},
+         [['pm_with', 'notification-bot@zulip.com']], ['msg_w']),
         ({'type': 'private', 'id': 1},
-         [['pm_with', 'notification-bot@zulip.com']],
-         frozenset({5827, 5}), ['msg_w']),
-        ({'type': 'private', 'id': 1},
-         [['is', 'search']],
-         frozenset(), []),
-        ({'type': 'private', 'id': 1},
-         [['pm_with', 'notification-bot@zulip.com']],
-         frozenset({5827, 3212}), []),
+         [['is', 'search']], []),
+        ({'type': 'private', 'id': 1,
+         'display_recipient': [{'id': 5827}, {'id': 3212}]},
+         [['pm_with', 'notification-bot@zulip.com']], []),
     ], ids=['stream_to_all_messages', 'private_to_all_private',
             'stream_to_stream', 'stream_to_topic',
             'stream_to_different_stream_same_topic', 'pm_existing_conv',
             'search', 'pm_no_existing_conv'])
     def test_append_message(self, mocker, user_dict, user_profile, response,
-                            narrow, recipients, model, log):
+                            narrow, model, log):
         model.update = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -583,7 +580,6 @@ class TestModel:
         model.msg_list = mocker.Mock()
         model.msg_list.log = []
         model.narrow = narrow
-        model.recipients = recipients
         model.user_id = user_profile['user_id']
         model.user_dict = user_dict
         event = {'message': response}
