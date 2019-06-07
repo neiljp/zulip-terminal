@@ -8,7 +8,7 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)](https://travis-ci.org/zulip/zulip-terminal)
-[![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
+[![Coverage status](https://codecov.io/github/zulip/zulip-terminal/coverage.svg?branch=master)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 ## Installation & Running
