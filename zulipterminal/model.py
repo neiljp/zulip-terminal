@@ -111,6 +111,41 @@ class Model:
         (self.stream_dict, (self.muted_streams, self.initial_unmuted_streams),
          self.pinned_streams, self.unpinned_streams) = stream_data
 
+        # Fetch additional messages to ensure non-empty all-messages narrow
+        # (potentially caused by all latest messages being in muted streams)
+        muted_stream_names = {
+            self.stream_dict[stream_id]['name']
+            for stream_id in self.muted_streams
+        }
+        def fetched_unmuted_messages() -> int:
+            return len([
+                1
+                for msg in self.index['messages'].values()
+                if (msg['type'] == 'stream' and
+                    msg['display_recipient'] not in muted_stream_names) or
+                   (msg['type'] == 'private')
+            ])
+        if fetched_unmuted_messages() == 0:
+            # No recent messages are unmuted - more are needed
+            if len(self.initial_unmuted_streams) == 0:
+                # Special case: all streams are muted
+                # - don't try to find recent messages, just fetch latest PMs
+                #   (which can't be muted)
+                self.get_messages(num_after=10, num_before=30, anchor=None,
+                                  narrow = [['is', 'private']])
+            else:
+                # Loop until we have enough recent messages, across streams/PMs
+                counts = [i*20 for i in range(1,11)] + [i*100 for i in range(3, 11)]
+                for count in counts:
+                    self.get_messages(num_after=10, num_before=count, anchor=None)
+                    if fetched_unmuted_messages() > 0:
+                        break
+                if fetched_unmuted_messages() == 0:
+                    # Still have no regular messages after fetching a lot
+                    # - fall back to fetching PMs
+                    self.get_messages(num_after=10, num_before=30, anchor=None,
+                                      narrow = [['is', 'private']])
+
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
 
