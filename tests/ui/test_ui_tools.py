@@ -1478,7 +1478,7 @@ class TestMessageBox:
 
 class TestTopButton:
     @pytest.mark.parametrize('prefix', [
-        None, '\N{BULLET}', '-', ('blue', 'o'),
+        None, '\N{BULLET}', '-', ('blue', 'o'), '',
     ])
     @pytest.mark.parametrize('width, count, short_text', [
         (8, 0, 'c..'),
@@ -1521,6 +1521,11 @@ class TestTopButton:
         mocker.patch(STREAMBUTTON + ".mark_muted")
         show_function = mocker.Mock()
 
+        # FIXME: The expected text is actually slightly incorrect
+        # FIXME: Improve the expected text so this isn't necessary?
+        if prefix == '':  # No space character, so reduce width to test against
+            width -= 1
+
         if isinstance(prefix, tuple):
             prefix = prefix[1]  # just checking text, not color
 
@@ -1543,7 +1548,8 @@ class TestTopButton:
         count_str = '' if count == 0 else str(count)
         if count < 0:
             count_str = 'M'
-        expected_text = ' {} {}{}{}'.format(
+        format_str = ' {0} {1}{2}{3}' if prefix != '' else ' {1}{2}  {3}'
+        expected_text = format_str.format(
                 prefix, short_text,
                 (width - 4 - len(short_text) - len(count_str))*' ',
                 count_str)

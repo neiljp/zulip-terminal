@@ -20,10 +20,18 @@ class TopButton(urwid.Button):
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
                  count: int=0) -> None:
+        if isinstance(prefix_character, tuple):
+            assert 0 <= len(prefix_character[1]) <=1
+        else:
+            assert 0 <= len(prefix_character) <=1
         self._caption = caption
-        self.prefix_character = prefix_character
+        self.prefix_character = [prefix_character]
+        self.post_prefix_spacing = ' ' if prefix_character else ''
         self.count = count
-        self.width_for_text_space_count = width - 4
+        self.width_for_text_space_count = width - 2 - (
+            len(self.prefix_character) + len(self.post_prefix_spacing)
+        )
+
         self.text_color = text_color
         self.show_function = show_function
         super().__init__("")
@@ -51,11 +59,13 @@ class TopButton(urwid.Button):
             caption = self._caption[:max_caption_length-2] + '..'
         else:
             caption = self._caption
-        num_spaces = max_caption_length - len(caption) + 1
+        num_spaces = 1 + 2 + max_caption_length - len(caption) - (
+            len(self.prefix_character) + len(self.post_prefix_spacing)
+        )
 
         return urwid.AttrMap(urwid.SelectableIcon(
-            [' ', self.prefix_character,
-             ' {}{}'.format(caption, num_spaces*' '),
+            [' ', self.prefix_character, self.post_prefix_spacing,
+             '{}{}'.format(caption, num_spaces*' '),
              ('idle',  count_text)],
             self.width_for_text_space_count+4),  # cursor location
             self.text_color,
