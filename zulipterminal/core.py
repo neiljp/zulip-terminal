@@ -30,6 +30,7 @@ class Controller:
         self.theme = theme
         self.autohide = autohide
         self.notify_enabled = notify
+
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
@@ -41,6 +42,14 @@ class Controller:
         self.view = View(self)
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
+
+    def enter_editor_mode_with(self, editor: Any) -> None:
+        self.editor_mode = True
+        self.editor = editor
+
+    def exit_editor_mode(self) -> None:
+        self.editor_mode = False
+        self.editor = None  # Not strictly necessary but could catch bugs
 
     @asynch
     def show_loading(self) -> None:

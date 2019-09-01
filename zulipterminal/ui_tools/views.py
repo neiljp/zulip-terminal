@@ -478,8 +478,7 @@ class MiddleColumnView(urwid.Frame):
             return super(MiddleColumnView, self).keypress(size, key)
 
         elif is_command_key('SEARCH_MESSAGES', key):
-            self.controller.editor_mode = True
-            self.controller.editor = self.search_box
+            self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus('header')
             return key
 
