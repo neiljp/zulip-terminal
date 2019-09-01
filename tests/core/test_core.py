@@ -40,7 +40,12 @@ class TestController:
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
+
         assert controller.theme == self.theme
+        assert controller.autohide == self.autohide
+        assert controller.notify_enabled == self.notify_enabled
+
+        assert controller.editor_mode is False
 
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:
