@@ -118,7 +118,7 @@ class Controller:
 
     def show_stream_info(self, color: str, name: str, desc: str) -> None:
         show_stream_view = StreamInfoView(self, color, name, desc)
-        self.show_pop_up(show_stream_view, " # {} ".format(name))
+        self.show_pop_up(show_stream_view, "# {}".format(name))
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

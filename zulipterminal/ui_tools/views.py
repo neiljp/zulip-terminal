@@ -836,9 +836,10 @@ class PopUpConfirmationView(urwid.Overlay):
 
 class StreamInfoView(urwid.ListBox):
     def __init__(self, controller: Any, color: str,
-                 name: str, desc: str)-> None:
+                 name: str, desc: str) -> None:
         self.controller = controller
-        self.width = max(len(desc), len("# {} ".format(name)))+2
+        # TODO: Width & Height handling could be improved
+        self.width = max(len(desc), len("# {}".format(name)))+2
         self.height = 2
         log = [urwid.Text(desc, align='center')]
         super(StreamInfoView, self).__init__(log)
