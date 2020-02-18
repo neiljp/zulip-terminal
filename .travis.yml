@@ -18,6 +18,13 @@ matrix:
       install: pip3 install .[linting]
       # Note that running isort on the lowest version should ensure changes are compatible
       script: ./tools/run-isort-check
+    - os: osx
+      name: "Install & pytest - Python 3 (OS X; xcode10)"
+      cache:
+      - $HOME/Library/Caches/pip
+      osx_image: xcode10
+      sudo: required
+      language: generic
     - python: 3.5
       name: "Install & pytest - CPython 3.5 (default linux)"
     - python: 3.6
@@ -28,13 +35,6 @@ matrix:
       name: "Install & pytest - CPython 3.8 (default linux)"
     - python: pypy3.5
       name: "Install & pytest - PyPy 3.5 (default linux)"
-    - os: osx
-      name: "Install & pytest - Python 3 (OS X; xcode10)"
-      cache:
-      - $HOME/Library/Caches/pip
-      osx_image: xcode10
-      sudo: required
-      language: generic
 install:
   - pip3 install . && pip3 install .[testing]
 script:
