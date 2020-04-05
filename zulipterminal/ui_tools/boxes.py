@@ -14,8 +14,9 @@ from urwid_readline import ReadlineEdit
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.emoji_names import EMOJI_NAMES
 from zulipterminal.helper import (
-    Message, match_emoji, match_groups, match_stream, match_user, render_table,
+    Message, match_emoji, match_groups, match_stream, match_user,
 )
+from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
 
 
