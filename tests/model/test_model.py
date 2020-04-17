@@ -1344,14 +1344,14 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_factory(self):
-        def _factory(*, op: str, message_id: int):
+        def _factory(*, op: str, message_id: int, user_id: int):
             return {
               'emoji_code': '1f44d',
               'id': 2,
               'user': {
-                  'email': 'Foo@zulip.com',
-                  'user_id': 5140,
-                  'full_name': 'Foo Boo'
+                  'email': f"User email #{user_id}",
+                  'full_name': f"User #{user_id}",
+                  'user_id': user_id,
               },
               'reaction_type': 'unicode_emoji',
               'message_id': message_id,
@@ -1397,15 +1397,16 @@ class TestModel:
             }
         return _factory
 
+    @pytest.mark.parametrize("user_id", [1001, 12])
     @pytest.mark.parametrize("op", ["add", "remove"])
     def test__handle_reaction_event_not_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
-        op,
+        op, user_id,
         unindexed_message_id=1,
     ):
         reaction_event = reaction_event_factory(
-            op=op, message_id=unindexed_message_id,
+            op=op, message_id=unindexed_message_id, user_id=user_id,
         )
         model.index = reaction_event_index_factory(
             [
@@ -1421,23 +1422,37 @@ class TestModel:
         assert model.index == previous_index
         assert not model._update_rendered_view.called
 
-    @pytest.mark.parametrize("op, event_message_id, expected_number_after", [
-        case("add", 1, 2,
-             id="other_user_adds_same_emoji==>added"),
-        case("add", 2, 1,
-             id="other_user_adds_emoji_to_blank==>added"),
-        case("remove", 1, 1,
-             id="other_user_removes_emoji_not_present==>not_removed"),
-        case("remove", 2, 0,
-             id="other_user_removes_emoji_none_present==>not_removed"),
-    ])
+    @pytest.mark.parametrize(
+        "op, event_message_id, user_id, expected_number_after",
+        [
+            case("add", 1, 12, 2,
+                 id="other_user_adds_same_emoji==>added"),
+            case("add", 1, 1001, 1,
+                 id="active_user_adds_existing_emoji==>unchanged"),
+
+            case("add", 2, 12, 1,
+                 id="other_user_adds_emoji_none_present==>added"),
+            case("add", 2, 1001, 1,
+                 id="active_user_adds_emoji_none_present==>added"),
+
+            case("remove", 1, 12, 1,
+                 id="other_user_removes_emoji_not_present==>not_removed"),
+            case("remove", 1, 1001, 0,
+                 id="active_user_removes_emoji_is_present==>removed"),
+
+            case("remove", 2, 12, 0,
+                 id="other_user_removes_emoji_none_present==>not_removed"),
+            case("remove", 2, 1001, 0,
+                 id="active_user_removes_emoji_none_present==>not_removed"),
+        ]
+    )
     def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
-        op, event_message_id, expected_number_after,
+        op, event_message_id, user_id, expected_number_after,
     ):
         reaction_event = reaction_event_factory(
-            op=op, message_id=event_message_id,
+            op=op, message_id=event_message_id, user_id=user_id,
         )
         model.index = reaction_event_index_factory(
             [
