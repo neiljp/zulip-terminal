@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import Any
 
 import pytest
+from pytest import param as case
 from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
@@ -1133,16 +1134,24 @@ class TestModel:
         assert model.index['messages'][99] == {}
         assert model.index == previous_index
 
-    @pytest.mark.parametrize('op, expected_number_after', [
-        ('add', 2),
-        ('remove', 1),
+    @pytest.mark.parametrize('op, msg_id, expected_number_after', [
+        case('add', 1, 2,
+             id="add--msg_1--not_present--added"),
+        case('add', 2, 1,
+             id="add--msg_2--not_present--added"),
+        case('remove', 1, 1,
+             id="remove--msg_1--not_present--not_removed"),
+        case('remove', 2, 0,
+             id="remove--msg_2--not_present--not_removed"),
     ])
     def test__handle_reaction_event_for_msg_in_index(self, mocker, model,
-                                                     op, expected_number_after,
+                                                     op, msg_id,
+                                                     expected_number_after,
                                                      reaction_event_response,
                                                      reaction_event_index):
         reaction_event_response['op'] = op
-        reaction_event_response['message_id'] = 1
+        reaction_event_response['message_id'] = msg_id
+
         model.index = reaction_event_index
 
         mock_msg = mocker.Mock()
@@ -1157,7 +1166,7 @@ class TestModel:
 
         model._handle_reaction_event(reaction_event_response)
 
-        reactions_after = model.index['messages'][1]['reactions']
+        reactions_after = model.index['messages'][msg_id]['reactions']
         assert len(reactions_after) == expected_number_after
 
         self.controller.update_screen.assert_called_once_with()
