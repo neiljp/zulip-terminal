@@ -1063,8 +1063,10 @@ class TestModel:
         assert model.controller.narrow_to_topic.called == narrow_changed
         assert model.controller.update_screen.called
 
-    @pytest.mark.parametrize('response, index', [
-        ({'emoji_code': '1f44d',
+    @pytest.fixture
+    def reaction_event_response(self):
+        return {
+          'emoji_code': '1f44d',
           'id': 2,
           'user': {
               'email': 'Foo@zulip.com',
@@ -1075,8 +1077,15 @@ class TestModel:
           'message_id': 1,
           'emoji_name': 'thumbs_up',
           'type': 'reaction',
-          'op': 'add'
-          }, {
+          'op': 'INVALID'  # Should be replaced in tests
+        }
+
+    @pytest.fixture
+    def reaction_event_index(self):
+        """
+        Minimal index to test reaction events
+        """
+        return {
             'messages': {
                 1: {
                     'id': 1,
@@ -1100,82 +1109,52 @@ class TestModel:
                     'reactions': [],
                 }
             }
-        })])
-    def test__handle_reaction_event(self, mocker, model, response, index):
-        model.index = index
-        mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        self.controller.view.message_view = mocker.Mock()
-        self.controller.view.message_view.log = [mock_msg, another_msg]
-        mock_msg.original_widget.message = index['messages'][1]
-        another_msg.original_widget.message = index['messages'][2]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
-        model._handle_reaction_event(response)
-        update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
-        assert update_emoji == response['emoji_code']
-        self.controller.update_screen.assert_called_once_with()
+        }
 
-        # TEST FOR FALSE CASES
-        model.index['messages'][1] = {}
-        model._handle_reaction_event(response)
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
+    def test__handle_reaction_event(self, mocker, model,
+                                    reaction_event_response,
+                                    reaction_event_index):
+        reaction_event_response['op'] = 'add'
+        model.index = reaction_event_index
 
-    @pytest.mark.parametrize('response, index', [
-        ({'emoji_code': '1f44d',
-          'id': 2,
-          'user': {
-              'email': 'Foo@zulip.com',
-              'user_id': 5140,
-              'full_name': 'Foo Boo'
-          },
-          'reaction_type': 'unicode_emoji',
-          'message_id': 1,
-          'emoji_name': 'thumbs_up',
-          'type': 'reaction',
-          'op': 'add'
-          }, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'content': 'Boo is Foo',
-                    'reactions': [
-                        {
-                            'user': {
-                                'email': 'Foo@zulip.com',
-                                'user_id': 1,
-                                'full_name': 'Foo Boo'
-                            },
-                            'reaction_type': 'unicode_emoji',
-                            'emoji_code': '1232',
-                            'emoji_name': 'thumbs_up'
-                        }
-                    ],
-                },
-                2: {
-                    'id': 2,
-                    'content': "Boo is not Foo",
-                    'reactions': [],
-                }
-            }
-        })])
-    def test__handle_reaction_event_remove_reaction(self, mocker, model,
-                                                    response, index):
-        model.index = index
         mock_msg = mocker.Mock()
         another_msg = mocker.Mock()
         self.controller.view.message_view = (
             mocker.Mock(log=[mock_msg, another_msg])
         )
-        mock_msg.original_widget.message = index['messages'][1]
-        another_msg.original_widget.message = index['messages'][2]
+        mock_msg.original_widget.message = model.index['messages'][1]
+        another_msg.original_widget.message = model.index['messages'][2]
+        mocker.patch('zulipterminal.model.create_msg_box_list',
+                     return_value=[mock_msg])
+        model._handle_reaction_event(reaction_event_response)
+        update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
+        assert update_emoji == reaction_event_response['emoji_code']
+        self.controller.update_screen.assert_called_once_with()
+
+        # TEST FOR FALSE CASES
+        model.index['messages'][1] = {}
+        model._handle_reaction_event(reaction_event_response)
+        # If there was no message earlier then don't update
+        assert model.index['messages'][1] == {}
+
+    def test__handle_reaction_event_remove_reaction(self, mocker, model,
+                                                    reaction_event_response,
+                                                    reaction_event_index):
+        reaction_event_response['op'] = 'remove'
+        model.index = reaction_event_index
+
+        mock_msg = mocker.Mock()
+        another_msg = mocker.Mock()
+        self.controller.view.message_view = (
+            mocker.Mock(log=[mock_msg, another_msg])
+        )
+        mock_msg.original_widget.message = model.index['messages'][1]
+        another_msg.original_widget.message = model.index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
 
-        # Test removing of reaction.
-        response['op'] = 'remove'
-        model._handle_reaction_event(response)
+        model._handle_reaction_event(reaction_event_response)
+
         assert len(model.index['messages'][1]['reactions']) == 1
 
     def test_update_star_status_no_index(self, mocker, model):
