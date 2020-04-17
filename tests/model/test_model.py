@@ -1065,13 +1065,14 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_response(self):
+        """
+        NOTE: Does not include all json data sent by server
+        """
         return {
           'emoji_code': '1f44d',
           'id': 2,
           'user': {
-              'email': 'Foo@zulip.com',
               'user_id': 5140,
-              'full_name': 'Foo Boo'
           },
           'reaction_type': 'unicode_emoji',
           'message_id': 1,
@@ -1084,18 +1085,16 @@ class TestModel:
     def reaction_event_index(self):
         """
         Minimal index to test reaction events
+        NOTE: Does not include all json data sent by server
         """
         return {
             'messages': {
                 1: {
                     'id': 1,
-                    'content': 'Boo is Foo',
                     'reactions': [
                         {
                             'user': {
-                                'email': 'Foo@zulip.com',
                                 'user_id': 1,
-                                'full_name': 'Foo Boo'
                             },
                             'reaction_type': 'unicode_emoji',
                             'emoji_code': '1232',
@@ -1105,7 +1104,6 @@ class TestModel:
                 },
                 2: {
                     'id': 2,
-                    'content': "Boo is not Foo",
                     'reactions': [],
                 }
             }
