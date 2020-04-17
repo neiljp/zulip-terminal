@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 import pytest
+from pytest import param as case
 from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
@@ -1420,15 +1421,20 @@ class TestModel:
         assert model.index == previous_index
         assert not model._update_rendered_view.called
 
-    @pytest.mark.parametrize("op, expected_number_after", [
-        ("add", 2),  # Different user, so add to reactions
-        ("remove", 1),  # Removing user doesn't match, so length remains 1
+    @pytest.mark.parametrize("op, event_message_id, expected_number_after", [
+        case("add", 1, 2,
+             id="other_user_adds_same_emoji==>added"),
+        case("add", 2, 1,
+             id="other_user_adds_emoji_to_blank==>added"),
+        case("remove", 1, 1,
+             id="other_user_removes_emoji_not_present==>not_removed"),
+        case("remove", 2, 0,
+             id="other_user_removes_emoji_none_present==>not_removed"),
     ])
     def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
-        op, expected_number_after,
-        event_message_id=1,
+        op, event_message_id, expected_number_after,
     ):
         reaction_event = reaction_event_factory(
             op=op, message_id=event_message_id,
