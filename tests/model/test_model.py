@@ -1109,9 +1109,31 @@ class TestModel:
             }
         }
 
-    def test__handle_reaction_event(self, mocker, model,
-                                    reaction_event_response,
-                                    reaction_event_index):
+    @pytest.mark.parametrize('op', ['add', 'remove'])
+    def test__handle_reaction_event_not_in_index(self, mocker, model,
+                                                 op,
+                                                 reaction_event_response,
+                                                 reaction_event_index):
+        reaction_event_response['op'] = op
+        model.index = reaction_event_index
+
+        mock_msg = mocker.Mock()
+        another_msg = mocker.Mock()
+        model.msg_list = mocker.Mock(log=[mock_msg, another_msg])
+        mock_msg.original_widget.message = model.index['messages'][1]
+        another_msg.original_widget.message = model.index['messages'][2]
+        mocker.patch('zulipterminal.model.create_msg_box_list',
+                     return_value=[mock_msg])
+        model.index['messages'][1] = {}
+
+        model._handle_reaction_event(reaction_event_response)
+
+        # If there was no message earlier then don't update
+        assert model.index['messages'][1] == {}
+
+    def test__handle_reaction_event_add_reaction(self, mocker, model,
+                                                 reaction_event_response,
+                                                 reaction_event_index):
         reaction_event_response['op'] = 'add'
         model.index = reaction_event_index
 
@@ -1128,12 +1150,6 @@ class TestModel:
         update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
         assert update_emoji == reaction_event_response['emoji_code']
         self.controller.update_screen.assert_called_once_with()
-
-        # TEST FOR FALSE CASES
-        model.index['messages'][1] = {}
-        model._handle_reaction_event(reaction_event_response)
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
 
     def test__handle_reaction_event_remove_reaction(self, mocker, model,
                                                     reaction_event_response,
