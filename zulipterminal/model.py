@@ -885,18 +885,32 @@ class Model:
 
             message = self.index['messages'][message_id]
             if event['op'] == 'add':
-                message['reactions'].append(
-                    {
-                        'user': event['user'],
-                        'reaction_type': event['reaction_type'],
-                        'emoji_code': event['emoji_code'],
-                        'emoji_name': event['emoji_name'],
-                    }
-                )
+                def emoji_tuple(reaction: Any) -> Tuple[str, ...]:
+                    user = reaction['user']
+                    if 'user_id' in user:
+                        user_id = user['user_id']
+                    else:
+                        user_id = user['id']
+                    return (
+                        reaction['emoji_code'],
+                        reaction['emoji_name'],
+                        reaction['reaction_type'],
+                        user_id,
+                    )
+                tuples = [emoji_tuple(r) for r in message['reactions']]
+                if emoji_tuple(event) not in tuples:
+                    message['reactions'].append(
+                        {
+                            'user': event['user'],
+                            'reaction_type': event['reaction_type'],
+                            'emoji_code': event['emoji_code'],
+                            'emoji_name': event['emoji_name'],
+                        }
+                    )
             else:
                 emoji_code = event['emoji_code']
-                user_id = event['user'].get('user_id', -2)
-                if user_id == -2:
+                user_id = event['user'].get('user_id', None)
+                if user_id is None:
                     user_id = event['user']['id']
                 message['reactions'] = [
                     reaction
