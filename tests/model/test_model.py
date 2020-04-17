@@ -1390,7 +1390,35 @@ class TestModel:
             }
         return _factory
 
-    def test__handle_reaction_event(
+    @pytest.mark.parametrize('op', ['add', 'remove'])
+    def test__handle_reaction_event_not_in_index(
+        self, mocker, model,
+        reaction_event_factory, reaction_event_index_factory,
+        op,
+    ):
+        reaction_event = reaction_event_factory(op=op)
+        model.index = reaction_event_index_factory(
+            [
+                (1, [(1, 'unicode_emoji', 1232, 'thumbs_up')]),
+                (2, []),
+            ]
+        )
+
+        mock_msg = mocker.Mock()
+        another_msg = mocker.Mock()
+        model.msg_list = mocker.Mock(log=[mock_msg, another_msg])
+        mock_msg.original_widget.message = model.index['messages'][1]
+        another_msg.original_widget.message = model.index['messages'][2]
+        mocker.patch('zulipterminal.model.create_msg_box_list',
+                     return_value=[mock_msg])
+        model.index['messages'][1] = {}
+
+        model._handle_reaction_event(reaction_event)
+
+        # If there was no message earlier then don't update
+        assert model.index['messages'][1] == {}
+
+    def test__handle_reaction_event_add_reaction(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
     ):
@@ -1415,12 +1443,6 @@ class TestModel:
         update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
         assert update_emoji == reaction_event['emoji_code']
         self.controller.update_screen.assert_called_once_with()
-
-        # TEST FOR FALSE CASES
-        model.index['messages'][1] = {}
-        model._handle_reaction_event(reaction_event)
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
 
     def test__handle_reaction_event_remove_reaction(
         self, mocker, model,
