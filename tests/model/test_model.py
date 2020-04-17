@@ -1344,13 +1344,13 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_factory(self):
-        def _factory(*, op: str, message_id: int):
+        def _factory(*, op: str, message_id: int, user_id: int):
             return {
               'emoji_code': '1f44d',
               'id': 2,
               'user': {
                   'email': 'Foo@zulip.com',
-                  'user_id': 5140,
+                  'user_id': user_id,
                   'full_name': 'Foo Boo'
               },
               'reaction_type': 'unicode_emoji',
@@ -1402,7 +1402,10 @@ class TestModel:
         reaction_event_factory, reaction_event_index_factory,
         op,
     ):
-        reaction_event = reaction_event_factory(op=op, message_id=99)
+        # id 99 is unindexed
+        reaction_event = reaction_event_factory(
+            op=op, message_id=99, user_id=5140,
+        )
         model.index = reaction_event_index_factory(
             [
                 (99, None),
@@ -1416,22 +1419,32 @@ class TestModel:
         assert model.index == previous_index
         assert not model._update_rendered_view.called
 
-    @pytest.mark.parametrize("op, msg_id, expected_number_after", [
-        case("add", 1, 2,
-             id="add--msg_1--not_present--added"),
-        case("add", 2, 1,
-             id="add--msg_2--not_present--added"),
-        case("remove", 1, 1,
-             id="remove--msg_1--not_present--not_removed"),
-        case("remove", 2, 0,
-             id="remove--msg_2--not_present--not_removed"),
+    @pytest.mark.parametrize("op, msg_id, user_id, expected_number_after", [
+        case("add", 1, 1, 2,
+             id="add--msg_1--user_1--already_present--not_added"),
+        case("add", 1, 2, 2,
+             id="add--msg_1--user_2--not_present--added"),
+        case("add", 2, 1, 1,
+             id="add--msg_2--user_1--not_present--added"),
+        case("add", 2, 2, 1,
+             id="add--msg_2--user_2--not_present--added"),
+        case("remove", 1, 1, 1,
+             id="remove--msg_1--user_1--present--removed"),
+        case("remove", 1, 2, 1,
+             id="remove--msg_1--user_2--not_matching--not_removed"),
+        case("remove", 2, 1, 0,
+             id="remove--msg_2--user_1--not_present--not_removed"),
+        case("remove", 2, 2, 0,
+             id="remove--msg_2--user_2--not_present--not_removed"),
     ])
     def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
-        op, msg_id, expected_number_after,
+        op, msg_id, user_id, expected_number_after,
     ):
-        reaction_event = reaction_event_factory(op=op, message_id=msg_id)
+        reaction_event = reaction_event_factory(
+            op=op, message_id=msg_id, user_id=user_id,
+        )
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, 'unicode_emoji', 1232, 'thumbs_up')]),
