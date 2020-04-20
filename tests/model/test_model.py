@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pytest
 from zulip import ZulipError
@@ -1343,7 +1343,7 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_factory(self):
-        def _factory(*, op: str):
+        def _factory(*, op: str, message_id: int):
             return {
               'emoji_code': '1f44d',
               'id': 2,
@@ -1353,7 +1353,7 @@ class TestModel:
                   'full_name': 'Foo Boo'
               },
               'reaction_type': 'unicode_emoji',
-              'message_id': 1,
+              'message_id': message_id,
               'emoji_name': 'thumbs_up',
               'type': 'reaction',
               'op': op,
@@ -1364,11 +1364,16 @@ class TestModel:
     def reaction_event_index_factory(self):
         """
         Generate index for reaction tests based on minimal specification
+
+        NOTE: reactions as None indicate not indexed, [] indicates no reaction
         """
-        def _factory(msgs: List[Tuple[int, List[Tuple[int, str, str, str]]]]):
+        MsgsType = List[Tuple[int, Optional[List[Tuple[int, str, str, str]]]]]
+
+        def _factory(msgs: MsgsType):
             return {
                 'messages': {
-                    message_id: {
+                    message_id:
+                    {} if reactions is None else {
                         'id': message_id,
                         'content': f"message content {message_id}",
                         'reactions': [
@@ -1396,33 +1401,25 @@ class TestModel:
         reaction_event_factory, reaction_event_index_factory,
         op,
     ):
-        reaction_event = reaction_event_factory(op=op)
+        reaction_event = reaction_event_factory(op=op, message_id=99)
         model.index = reaction_event_index_factory(
             [
-                (1, [(1, 'unicode_emoji', 1232, 'thumbs_up')]),
-                (2, []),
+                (99, None),
             ]
         )
-
-        mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        model.msg_list = mocker.Mock(log=[mock_msg, another_msg])
-        mock_msg.original_widget.message = model.index['messages'][1]
-        another_msg.original_widget.message = model.index['messages'][2]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
-        model.index['messages'][1] = {}
+        model._update_rendered_view = mocker.Mock()
+        previous_index = deepcopy(model.index)
 
         model._handle_reaction_event(reaction_event)
 
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
+        assert model.index == previous_index
+        assert not model._update_rendered_view.called
 
     def test__handle_reaction_event_add_reaction(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
     ):
-        reaction_event = reaction_event_factory(op="add")
+        reaction_event = reaction_event_factory(op="add", message_id=1)
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, 'unicode_emoji', 1232, 'thumbs_up')]),
@@ -1448,7 +1445,7 @@ class TestModel:
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
     ):
-        reaction_event = reaction_event_factory(op="remove")
+        reaction_event = reaction_event_factory(op="remove", message_id=1)
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, 'unicode_emoji', 1232, 'thumbs_up')]),
