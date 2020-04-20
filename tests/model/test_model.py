@@ -1416,11 +1416,16 @@ class TestModel:
         assert model.index == previous_index
         assert not model._update_rendered_view.called
 
-    def test__handle_reaction_event_add_reaction(
+    @pytest.mark.parametrize("op, expected_number_after", [
+        ("add", 2),
+        ("remove", 1),
+    ])
+    def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
+        op, expected_number_after,
     ):
-        reaction_event = reaction_event_factory(op="add", message_id=1)
+        reaction_event = reaction_event_factory(op=op, message_id=1)
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
@@ -1431,27 +1436,9 @@ class TestModel:
 
         model._handle_reaction_event(reaction_event)
 
-        update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
-        assert update_emoji == reaction_event['emoji_code']
+        reactions_after = model.index['messages'][1]['reactions']
+        assert len(reactions_after) == expected_number_after
 
-        model._update_rendered_view.assert_called_once_with(1)
-
-    def test__handle_reaction_event_remove_reaction(
-        self, mocker, model,
-        reaction_event_factory, reaction_event_index_factory,
-    ):
-        reaction_event = reaction_event_factory(op="remove", message_id=1)
-        model.index = reaction_event_index_factory(
-            [
-                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
-                (2, []),
-            ]
-        )
-        model._update_rendered_view = mocker.Mock()
-
-        model._handle_reaction_event(reaction_event)
-
-        assert len(model.index['messages'][1]['reactions']) == 1
         model._update_rendered_view.assert_called_once_with(1)
 
     @pytest.fixture(params=[
