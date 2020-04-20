@@ -1075,7 +1075,7 @@ class TestModel:
               'user_id': 5140,
           },
           'reaction_type': 'unicode_emoji',
-          'message_id': 1,
+          'message_id': 'INVALID',  # Should be replaced in tests
           'emoji_name': 'thumbs_up',
           'type': 'reaction',
           'op': 'INVALID'  # Should be replaced in tests
@@ -1105,7 +1105,8 @@ class TestModel:
                 2: {
                     'id': 2,
                     'reactions': [],
-                }
+                },
+                99: {},  # NOTE: Represents unindexed message
             }
         }
 
@@ -1115,6 +1116,7 @@ class TestModel:
                                                  reaction_event_response,
                                                  reaction_event_index):
         reaction_event_response['op'] = op
+        reaction_event_response['message_id'] = 99  # unindexed
         model.index = reaction_event_index
 
         mock_msg = mocker.Mock()
@@ -1124,17 +1126,18 @@ class TestModel:
         another_msg.original_widget.message = model.index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
-        model.index['messages'][1] = {}
+        previous_index = deepcopy(model.index)
 
         model._handle_reaction_event(reaction_event_response)
 
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
+        assert model.index['messages'][99] == {}
+        assert model.index == previous_index
 
     def test__handle_reaction_event_add_reaction(self, mocker, model,
                                                  reaction_event_response,
                                                  reaction_event_index):
         reaction_event_response['op'] = 'add'
+        reaction_event_response['message_id'] = 1
         model.index = reaction_event_index
 
         mock_msg = mocker.Mock()
@@ -1155,6 +1158,7 @@ class TestModel:
                                                     reaction_event_response,
                                                     reaction_event_index):
         reaction_event_response['op'] = 'remove'
+        reaction_event_response['message_id'] = 1
         model.index = reaction_event_index
 
         mock_msg = mocker.Mock()
