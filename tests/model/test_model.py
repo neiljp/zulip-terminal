@@ -1133,10 +1133,15 @@ class TestModel:
         assert model.index['messages'][99] == {}
         assert model.index == previous_index
 
-    def test__handle_reaction_event_add_reaction(self, mocker, model,
-                                                 reaction_event_response,
-                                                 reaction_event_index):
-        reaction_event_response['op'] = 'add'
+    @pytest.mark.parametrize('op, expected_number_after', [
+        ('add', 2),
+        ('remove', 1),
+    ])
+    def test__handle_reaction_event_for_msg_in_index(self, mocker, model,
+                                                     op, expected_number_after,
+                                                     reaction_event_response,
+                                                     reaction_event_index):
+        reaction_event_response['op'] = op
         reaction_event_response['message_id'] = 1
         model.index = reaction_event_index
 
@@ -1149,31 +1154,13 @@ class TestModel:
         another_msg.original_widget.message = model.index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
+
         model._handle_reaction_event(reaction_event_response)
-        update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
-        assert update_emoji == reaction_event_response['emoji_code']
+
+        reactions_after = model.index['messages'][1]['reactions']
+        assert len(reactions_after) == expected_number_after
+
         self.controller.update_screen.assert_called_once_with()
-
-    def test__handle_reaction_event_remove_reaction(self, mocker, model,
-                                                    reaction_event_response,
-                                                    reaction_event_index):
-        reaction_event_response['op'] = 'remove'
-        reaction_event_response['message_id'] = 1
-        model.index = reaction_event_index
-
-        mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        self.controller.view.message_view = (
-            mocker.Mock(log=[mock_msg, another_msg])
-        )
-        mock_msg.original_widget.message = model.index['messages'][1]
-        another_msg.original_widget.message = model.index['messages'][2]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
-
-        model._handle_reaction_event(reaction_event_response)
-
-        assert len(model.index['messages'][1]['reactions']) == 1
 
     def test_update_star_status_no_index(self, mocker, model):
         model.index = dict(messages={})  # Not indexed
