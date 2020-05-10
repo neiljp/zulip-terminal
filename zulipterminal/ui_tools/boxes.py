@@ -284,23 +284,30 @@ class MessageBox(urwid.Pile):
         stream_topic_separator = '▶'
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color
-        stream_title_markup = ('bar', [
+        stream_title_markup = (None, [
             (bar_color, '{} {} '.format(self.stream_name,
                                         stream_topic_separator)),
             ('title', ' {} '.format(self.topic_name))
         ])
         stream_title = urwid.Text(stream_title_markup)
-        header = urwid.AttrWrap(stream_title, 'bar')
+        header = urwid.Columns([
+            (len(stream_title.text), stream_title),
+            urwid.AttrWrap(urwid.Divider('━'), bar_color[1:]),
+        ])
         header.markup = stream_title_markup
         return header
 
     def private_header(self) -> Any:
-        title_markup = ('header', [
+        title_markup = (None, [
             ('custom', 'You and '),
             ('custom', self.recipients_names)
         ])
         title = urwid.Text(title_markup)
-        header = urwid.AttrWrap(title, 'bar')
+        header = urwid.Columns([
+            (len(title.text), title),
+            (1, urwid.Text(' ')),
+            urwid.AttrWrap(urwid.Divider('━'), 'custom'),
+        ])
         header.markup = title_markup
         return header
 
