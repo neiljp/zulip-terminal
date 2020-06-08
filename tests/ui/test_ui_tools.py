@@ -20,6 +20,7 @@ from zulipterminal.ui_tools.views import (
 
 
 VIEWS = "zulipterminal.ui_tools.views"
+BUTTONS = "zulipterminal.ui_tools.buttons"
 TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
 STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
@@ -2336,6 +2337,33 @@ class TestUserButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
+
+    @pytest.mark.parametrize('enter_key', keys_for_command('ENTER'))
+    def test_activate_called_once_on_keypress(
+        self,
+        mocker, enter_key,
+        caption="some user",
+        width=30,
+        count=5,
+        color=None,
+    ):
+        user = {
+            'email': 'some_email',  # value unimportant
+            'user_id': 5,           # value unimportant
+            'full_name': caption,
+        }  # type: Dict[str, Any]
+        size = (20,)
+        activate = mocker.patch(BUTTONS + ".UserButton.activate")
+        user_button = UserButton(user,
+                                 controller=mocker.Mock(),
+                                 view=mocker.Mock(),
+                                 width=width,
+                                 color=color,
+                                 count=count)
+
+        user_button.keypress(size, enter_key)
+
+        assert activate.call_count == 1
 
 
 class TestTopicButton:
