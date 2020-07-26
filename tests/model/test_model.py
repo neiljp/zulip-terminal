@@ -1095,10 +1095,10 @@ class TestModel:
                     'reactions': [
                         {
                             'user': {
-                                'user_id': 1,
+                                'user_id': 1001,
                             },
                             'reaction_type': 'unicode_emoji',
-                            'emoji_code': '1232',
+                            'emoji_code': '1f44d',
                             'emoji_name': 'thumbs_up'
                         }
                     ],
@@ -1135,22 +1135,22 @@ class TestModel:
         assert model.index == previous_index
 
     @pytest.mark.parametrize('op, msg_id, user_id, expected_number_after', [
-        case('add', 1, 1, 2,
-             id="add--msg_1--user_1--already_present--not_added"),
-        case('add', 1, 2, 2,
-             id="add--msg_1--user_2--not_present--added"),
-        case('add', 2, 1, 1,
-             id="add--msg_2--user_1--not_present--added"),
-        case('add', 2, 2, 1,
-             id="add--msg_2--user_2--not_present--added"),
-        case('remove', 1, 1, 1,
-             id="remove--msg_1--user_1--present--removed"),
-        case('remove', 1, 2, 1,
-             id="remove--msg_1--user_2--not_matching--not_removed"),
-        case('remove', 2, 1, 0,
-             id="remove--msg_2--user_1--not_present--not_removed"),
-        case('remove', 2, 2, 0,
-             id="remove--msg_2--user_2--not_present--not_removed"),
+        case('add', 1, 1001, 1,
+             id="add--msg_1--me--already_present--not_added"),
+        case('add', 1, 12, 2,
+             id="add--msg_1--user_12--not_present--added"),
+        case('add', 2, 1001, 1,
+             id="add--msg_2--me--not_present--added"),
+        case('add', 2, 12, 1,
+             id="add--msg_2--user_12--not_present--added"),
+        case('remove', 1, 1001, 0,
+             id="remove--msg_1--me--present--removed"),
+        case('remove', 1, 12, 0,
+             id="remove--msg_1--user_12--not_matching--not_removed"),
+        case('remove', 2, 1001, 0,
+             id="remove--msg_2--me--not_present--not_removed"),
+        case('remove', 2, 12, 0,
+             id="remove--msg_2--user_12--not_present--not_removed"),
     ])
     def test__handle_reaction_event_for_msg_in_index(self, mocker, model,
                                                      op, msg_id, user_id,
