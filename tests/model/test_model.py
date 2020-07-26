@@ -1173,9 +1173,12 @@ class TestModel:
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
 
+        print(model.index['messages'][msg_id]['reactions'], flush=True)
+
         model._handle_reaction_event(reaction_event_response)
 
         reactions_after = model.index['messages'][msg_id]['reactions']
+        print(reactions_after, flush=True)
         assert len(reactions_after) == expected_number_after
 
         #self.controller.update_screen.assert_called_once_with()
