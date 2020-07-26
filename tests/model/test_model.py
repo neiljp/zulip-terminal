@@ -1435,6 +1435,11 @@ class TestModel:
             case("add", 2, 1001, 1,
                  id="active_user_adds_emoji_none_present==>added"),
 
+            case("add", 3, 12, 2,
+                 id="other_user_adds_emoji_is_present==>unchanged"),
+            case("add", 3, 1001, 2,
+                 id="active_user_adds_emoji_is_present==>unchanged"),
+
             case("remove", 1, 12, 1,
                  id="other_user_removes_emoji_not_present==>not_removed"),
             case("remove", 1, 1001, 0,
@@ -1444,6 +1449,11 @@ class TestModel:
                  id="other_user_removes_emoji_none_present==>not_removed"),
             case("remove", 2, 1001, 0,
                  id="active_user_removes_emoji_none_present==>not_removed"),
+
+            case('remove', 3, 12, 1,
+                 id="other_user_removes_emoji_is_present==>removed"),
+            case('remove', 3, 1001, 1,
+                 id="active_user_removes_emoji_is_present==>removed"),
         ]
     )
     def test__handle_reaction_event_for_msg_in_index(
@@ -1458,6 +1468,10 @@ class TestModel:
             [
                 (1, [(1001, "unicode_emoji", "1f44d", "thumbs_up")]),  # mine
                 (2, []),
+                (3, [
+                    (1001, 'unicode_emoji', '1f44d', 'thumbs_up'),
+                    (12, 'unicode_emoji', '1f44d', 'thumbs_up'),
+                    ])
             ]
         )
         model._update_rendered_view = mocker.Mock()
