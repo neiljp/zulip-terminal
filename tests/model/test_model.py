@@ -1107,6 +1107,27 @@ class TestModel:
                     'id': 2,
                     'reactions': [],
                 },
+                3: {
+                    'id': 3,
+                    'reactions': [
+                        {
+                            'user': {
+                                'user_id': 1001,
+                            },
+                            'reaction_type': 'unicode_emoji',
+                            'emoji_code': '1f44d',
+                            'emoji_name': 'thumbs_up'
+                        },
+                        {
+                            'user': {
+                                'user_id': 12,
+                            },
+                            'reaction_type': 'unicode_emoji',
+                            'emoji_code': '1f44d',
+                            'emoji_name': 'thumbs_up'
+                        }
+                    ],
+                },
                 99: {},  # NOTE: Represents unindexed message
             }
         }
@@ -1143,6 +1164,10 @@ class TestModel:
              id="add--msg_2--me--not_present--added"),
         case('add', 2, 12, 1,
              id="add--msg_2--user_12--not_present--added"),
+        case('add', 3, 1001, 2,
+             id="add--msg_3--me--already_present--not_added"),
+        case('add', 3, 12, 2,
+             id="add--msg_3--user_12--already_present--not_added"),
         case('remove', 1, 1001, 0,
              id="remove--msg_1--me--present--removed"),
         case('remove', 1, 12, 0,
@@ -1151,6 +1176,10 @@ class TestModel:
              id="remove--msg_2--me--not_present--not_removed"),
         case('remove', 2, 12, 0,
              id="remove--msg_2--user_12--not_present--not_removed"),
+        case('remove', 3, 1001, 1,
+             id="remove--msg_3--me--present--removed"),
+        case('remove', 3, 12, 1,
+             id="remove--msg_3--user_12--present--removed"),
     ])
     def test__handle_reaction_event_for_msg_in_index(self, mocker, model,
                                                      op, msg_id, user_id,
