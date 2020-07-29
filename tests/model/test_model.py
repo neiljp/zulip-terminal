@@ -1430,7 +1430,7 @@ class TestModel:
              id="add--msg_2--user_12--not_present--added"),
         case("remove", 1, 1001, 0,
              id="remove--msg_1--me--present--removed"),
-        case("remove", 1, 12, 0,
+        case("remove", 1, 12, 1,
              id="remove--msg_1--user_12--not_matching--not_removed"),
         case("remove", 2, 1001, 0,
              id="remove--msg_2--me--not_present--not_removed"),
