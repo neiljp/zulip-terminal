@@ -26,6 +26,8 @@ matrix:
       name: "Install & pytest - CPython 3.7 (default linux)"
     - python: 3.8
       name: "Install & pytest - CPython 3.8 (default linux)"
+    - python: 3.9
+      name: "Install & pytest - CPython 3.9 (default linux)"
     - python: pypy3.6-7.3.1
       # Use PyPy3 7.3.1, which fixes a typing_extensions.TypedDict bug
       name: "Install & pytest - PyPy 3.6 v7.3.1 (default linux)"
