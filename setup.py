@@ -89,7 +89,7 @@ setup(
         'Issues':
             'https://github.com/zulip/zulip-terminal/issues',
     },
-    python_requires='>=3.5, <3.9',
+    python_requires='>=3.5, <3.10',
     keywords='',
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
