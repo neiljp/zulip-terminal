@@ -18,15 +18,7 @@ matrix:
       install: pip3 install .[linting]
       # Note that running isort on the lowest version should ensure changes are compatible
       script: ./tools/run-isort-check
-    - python: 3.5
-      name: "Install & pytest - CPython 3.5 (default linux)"
-    - python: 3.6
-      name: "Install & pytest - CPython 3.6 (default linux)"
-    - python: 3.7
-      name: "Install & pytest - CPython 3.7 (default linux)"
-    - python: 3.8
-      name: "Install & pytest - CPython 3.8 (default linux)"
-    - python: 3.9
+    - python: 3.9-dev
       name: "Install & pytest - CPython 3.9 (default linux)"
     - python: pypy3.6-7.3.1
       # Use PyPy3 7.3.1, which fixes a typing_extensions.TypedDict bug
