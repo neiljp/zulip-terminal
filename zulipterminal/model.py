@@ -998,6 +998,7 @@ class Model:
         Handle updated (edited) messages (changed content/subject)
         """
         message_id = event['message_id']
+
         # If the message is indexed
         if self.index['messages'].get(message_id):
             message = self.index['messages'][message_id]
@@ -1008,26 +1009,30 @@ class Model:
                 self.index['messages'][message_id] = message
                 self._update_rendered_view(message_id)
 
-            # 'subject' is not present in update event if
-            # the event didn't have a 'subject' update.
-            if 'subject' in event:
-                new_subject = event['subject']
-                stream_id = event['stream_id']
-                for msg_id in event['message_ids']:
-                    self.index['messages'][msg_id]['subject'] = new_subject
-                    self._update_rendered_view(msg_id)
-                if stream_id in self.index['topics']:
-                    # If topic view is open, reload list else reset cache.
-                    if hasattr(self.controller, 'view'):
-                        view = self.controller.view
-                        if (view.left_panel.is_in_topic_view_with_stream_id(
-                                message['stream_id'])):
-                            self._fetch_topics_in_streams([stream_id])
-                            view.left_panel.show_topic_view(
-                                view.topic_w.stream_button)
-                            self.controller.update_screen()
-                        else:
-                            self.index['topics'][stream_id] = []
+        # NOTE: This is independent of messages being indexed
+        if 'subject' in event:
+            new_subject = event['subject']
+            stream_id = event['stream_id']
+
+            # Update any indexed messages & re-render them
+            for message_id in event['message_ids']:
+                indexed_msg = self.index['messages'].get(message_id)
+                if indexed_msg:
+                    indexed_msg['subject'] = new_subject
+                    self._update_rendered_view(message_id)
+
+            # If topic view is open, reload list else reset cache.
+            if stream_id in self.index['topics']:
+                if hasattr(self.controller, 'view'):
+                    view = self.controller.view
+                    if (view.left_panel.is_in_topic_view_with_stream_id(
+                            stream_id)):
+                        self._fetch_topics_in_streams([stream_id])
+                        view.left_panel.show_topic_view(
+                            view.topic_w.stream_button)
+                        self.controller.update_screen()
+                    else:
+                        self.index['topics'][stream_id] = []
 
     def _handle_reaction_event(self, event: Event) -> None:
         """
