@@ -74,7 +74,7 @@ class TopButton(urwid.Button):
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces * ' '),
-             ' ', (count_text[0],  count_text)],
+             ' ', count_text],
             self.width_for_text_and_count + 5),  # cursor location
             text_color,
             'selected')
