@@ -178,7 +178,7 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count', MUTE_MARKER), 'muted')
+        self.update_widget(('muted', MUTE_MARKER), 'muted')
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
@@ -248,7 +248,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count',  MUTE_MARKER), 'muted')
+        self.update_widget(('muted',  MUTE_MARKER), 'muted')
     # TODO: Handle event-based approach for topic-muting.
 
 
