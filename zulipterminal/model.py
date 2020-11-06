@@ -1000,14 +1000,15 @@ class Model:
         message_id = event['message_id']
 
         # If the message is indexed
-        if self.index['messages'].get(message_id):
-            message = self.index['messages'][message_id]
+        if 'rendered_content' in event:
+            message = self.index['messages'].get(message_id, None)
+            assert message is not None
+
             self.index['edited_messages'].add(message_id)
 
-            if 'rendered_content' in event:
-                message['content'] = event['rendered_content']
-                self.index['messages'][message_id] = message
-                self._update_rendered_view(message_id)
+            message['content'] = event['rendered_content']
+            self.index['messages'][message_id] = message
+            self._update_rendered_view(message_id)
 
         # NOTE: This is independent of messages being indexed
         if 'subject' in event:
