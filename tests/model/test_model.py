@@ -967,7 +967,9 @@ class TestModel:
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
-    @pytest.mark.parametrize(['response', 'update_call_count', 'new_index',
+    @pytest.mark.parametrize(['event',
+                              'expected_times_messages_rerendered',
+                              'expected_index',
                               'topic_view_enabled'], [
         ({  # Only subject of 1 message is updated.
             'message_id': 1,
@@ -1040,7 +1042,7 @@ class TestModel:
             'subject': 'new subject',
             'stream_id': 10,
             'message_ids': [1],
-        }, 2, {
+        }, 2, {  # 2=update of subject & content
             'messages': {
                 1: {
                     'id': 1,
@@ -1124,10 +1126,18 @@ class TestModel:
             # _fetch_topics_in_streams will update this.
             'topics': {10: ['old subject']},
         }, True),
+    ], ids=[
+        "Only subject of 1 message is updated",
+        "Subject of 2 messages is updated",
+        "Message content is updated",
+        "Both message content and subject is updated",
+        "Some new type of update which we don't handle yet",
+        "message_id not present in index",
+        "Message content is updated and topic view is enabled",
     ])
     def test__handle_update_message_event(self, mocker, model,
-                                          response, new_index,
-                                          update_call_count,
+                                          event, expected_index,
+                                          expected_times_messages_rerendered,
                                           topic_view_enabled):
         model.index = {
             'messages': {
@@ -1147,12 +1157,15 @@ class TestModel:
         (model.controller.view.left_panel.is_in_topic_view_with_stream_id.
             return_value) = topic_view_enabled
 
-        model._handle_update_message_event(response)
+        model._handle_update_message_event(event)
 
-        assert model.index == new_index
-        assert model._update_rendered_view.call_count == update_call_count
+        assert model.index == expected_index
+
+        calls_to_update_messages = model._update_rendered_view.call_count
+        assert calls_to_update_messages == expected_times_messages_rerendered
+
         if topic_view_enabled:
-            fetch_topics.assert_called_once_with([response['stream_id']])
+            fetch_topics.assert_called_once_with([event['stream_id']])
             stream_button = model.controller.view.topic_w.stream_button
             (model.controller.view.left_panel.show_topic_view.
                 assert_called_once_with(stream_button))
