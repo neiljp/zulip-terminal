@@ -990,7 +990,7 @@ class TestModel:
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1},
+            'edited_messages': set(),
             'topics': {10: []},
         }, False),
         ({  # Subject of 2 messages is updated
@@ -1012,7 +1012,7 @@ class TestModel:
                     'content': 'old content',
                     'subject': 'new subject'
                 }},
-            'edited_messages': {1},
+            'edited_messages': set(),
             'topics': {10: []},
         }, False),
         ({  # Message content is updated
@@ -1076,7 +1076,7 @@ class TestModel:
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1},
+            'edited_messages': set(),
             'topics': {10: ['old subject']},
         }, False),
         ({  # message_id not present in index.
@@ -1100,7 +1100,7 @@ class TestModel:
                     'subject': 'old subject'
                 }},
             'edited_messages': set(),
-            'topics': {10: ['old subject']},
+            'topics': {10: []},
         }, False),
         ({  # Message content is updated and topic view is enabled.
             'message_id': 1,
@@ -1166,9 +1166,11 @@ class TestModel:
 
         if topic_view_enabled:
             fetch_topics.assert_called_once_with([event['stream_id']])
+
             stream_button = model.controller.view.topic_w.stream_button
             (model.controller.view.left_panel.show_topic_view.
                 assert_called_once_with(stream_button))
+
             model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize('subject, narrow, new_log_len', [
