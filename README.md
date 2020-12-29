@@ -24,6 +24,18 @@ Specific aims include:
 
 For more information take a look at the [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md), or see below for information on installing and getting started!
 
+### Feature status
+
+We consider the client to already provide a stable moderately-featureful everyday-user experience.
+
+The current development focus is on improving aspects of everyday usage which are more commonly used - to reduce the need for users to temporarily switch to another client for a particular feature.
+
+Current limitations which we expect to only resolve over the long term include support for:
+* Operations performed by users with extra privileges (owners/admins)
+* Accessing and updating many lesser-used settings
+* Using a mouse/pointer to achieve all actions
+* An internationalized UI
+
 ### Supported platforms
 - Linux
 - OSX
