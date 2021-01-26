@@ -7,6 +7,10 @@ jobs:
     name: Analyse
     runs-on: ubuntu-latest
 
+    # Only run this job for zulip/zulip-terminal since it's unlikely to be
+    # enabled on personal repos
+    if: ${{ github.event.repository.full_name == 'zulip/zulip-terminal' }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
