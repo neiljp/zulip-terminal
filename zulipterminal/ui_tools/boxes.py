@@ -1291,11 +1291,6 @@ class MessageBox(urwid.Pile):
                                      List[Tuple[str, str]]]:
         body = BeautifulSoup(content, 'html.parser')
 
-        soup_lxml = BeautifulSoup(content, 'lxml')
-        body_lxml = soup_lxml.find(name='body')
-
-        assert body.text == body_lxml.text, f"{body.text}\n{body_lxml.text}"
-
         metadata = dict(
             server_url=server_url,
             message_links=OrderedDict(),
