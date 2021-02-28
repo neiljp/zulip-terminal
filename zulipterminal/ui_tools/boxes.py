@@ -1289,8 +1289,12 @@ class MessageBox(urwid.Pile):
                           ) -> Tuple[Tuple[None, Any],
                                      'OrderedDict[str, Tuple[str, int, bool]]',
                                      List[Tuple[str, str]]]:
-        soup = BeautifulSoup(content, 'lxml')
-        body = soup.find(name='body')
+        body = BeautifulSoup(content, 'html.parser')
+
+        soup_lxml = BeautifulSoup(content, 'lxml')
+        body_lxml = soup_lxml.find(name='body')
+
+        assert body.text == body_lxml.text, f"{body.text}\n{body_lxml.text}"
 
         metadata = dict(
             server_url=server_url,
@@ -1300,7 +1304,7 @@ class MessageBox(urwid.Pile):
 
         if body and body.find(name='blockquote'):
             metadata['bq_len'] = (
-                cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
+                cls.indent_quoted_content(body, QUOTED_TEXT_MARKER)
             )
 
         markup, message_links, time_mentions = cls.soup2markup(body, metadata)

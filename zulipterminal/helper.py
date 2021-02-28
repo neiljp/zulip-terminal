@@ -22,7 +22,6 @@ from typing import (
 )
 from urllib.parse import unquote
 
-import lxml.html
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
@@ -612,8 +611,18 @@ def canonicalize_color(color: str) -> str:
 
 
 def notify(title: str, html_text: str) -> str:
-    document = lxml.html.document_fromstring(html_text)
-    text = document.text_content()
+    from html.parser import HTMLParser
+
+    class JustText(HTMLParser):
+        def __init__(self) -> None:
+            self.text = ""
+            super().__init__()
+
+        def handle_data(self, data: str) -> None:
+            self.text += data
+    parser = JustText()
+    parser.feed(html_text)
+    text = parser.text
 
     command_list = None
     if MACOS:
