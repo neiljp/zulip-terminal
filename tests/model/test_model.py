@@ -1421,8 +1421,8 @@ class TestModel:
         assert not model._update_rendered_view.called
 
     @pytest.mark.parametrize("op, expected_number_after", [
-        ("add", 2),
-        ("remove", 1),  # Removed emoji doesn't match, so length remains 1
+        ("add", 2),  # Different user, so add to reactions
+        ("remove", 1),  # Removing user doesn't match, so length remains 1
     ])
     def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
@@ -1435,7 +1435,7 @@ class TestModel:
         )
         model.index = reaction_event_index_factory(
             [
-                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
+                (1, [(1001, "unicode_emoji", "1f44d", "thumbs_up")]),  # mine
                 (2, []),
             ]
         )
