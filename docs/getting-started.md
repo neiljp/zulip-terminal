@@ -1,4 +1,4 @@
-[//]: # (For future development: The images in the tutorial were taken from a terminal window with 135 columns and 35 lines. The blue arrows are #4EC8FB.)
+[//]: # (For future development: The images in the tutorial were taken from a terminal window with 135 columns and 35 lines. The blue arrows are #4EC8FB. Use pngcrush to minimize image size.)
 
 # Zulip Terminal User Tutorial
 
@@ -94,7 +94,7 @@ Check out the top of the middle column, your current narrow should now be "test 
 
 ### Narrow to a Topic
 
-First, let's move our cursor back to the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream in the left column - otherwise the following keyboard shortcut won't work. With our cursor on the [**#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream, type <kbd>t</kbd> to toggle on a list of topics within that stream. Move your cursor to a random topic and then press <kbd>Enter</kbd> to narrow to that topic. You've successfully narrowed to a topic! Notice how at the top of the middle column your current narrow is displayed as **test here ► topic you chose**. 
+First, let's move our cursor back to the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream in the left column - otherwise the following keyboard shortcut won't work. With our cursor on the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream, type <kbd>t</kbd> to toggle on a list of topics within that stream. Move your cursor to a random topic and then press <kbd>Enter</kbd> to narrow to that topic. You've successfully narrowed to a topic! Notice how at the top of the middle column your current narrow is displayed as **test here ► topic you chose**.
 
 To toggle off the topic list and go back to viewing the stream list, move your cursor back to the list of topics in the left column and type <kbd>t</kbd> again.
 
@@ -188,6 +188,6 @@ To exit out of the Zulip Terminal app, type <kbd>ctrl</kbd><kbd>c</kbd>.
 
 ## What's Next?
 
-That's all for today! If you have a community server account, you should use the web app to [subscribe](https://zulip.com/help/browse-and-subscribe-to-streams#:~:text=Click%20All%20streams%20in%20the,gray%20checkmark%20to%20its%20left.) to the **[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)** stream. Then you use Zulip Terminal to say hi and chat in the **[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)** stream!
+That's all for today! If you have a community server account, you should use the web app to [subscribe](https://zulip.com/help/browse-and-subscribe-to-streams) to the **[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)** stream. Then you can use Zulip Terminal to say hi and chat in the **[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)** stream!
 
 If you're looking for more things to try with Zulip Terminal, how about exploring our [FAQ](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md)? We explain more in-depth about how to [change your theme](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#are-there-any-themes-available-other-than-the-default-one), [tell when messages are read](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#when-are-messages-marked-as-having-been-read), and [access multiple servers](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#how-do-i-access-multiple-servers).
