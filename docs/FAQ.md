@@ -68,6 +68,59 @@ Since we expect the above to be straightforward for most users and it allows the
 However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
 In the longer term we may move to multiple servers per session, which is tracked in [zulip-terminal#961](https://github.com/zulip/zulip-terminal/issues/961).
 
+## How do I use autocompletes in ZT?
+
+Composing messages could be a tiring task when you have to type all things by yourself. Autocompletes come to the rescue here! ZT currently supports some basic autocompletes, for different compose boxes.
+
+### Hotkeys triggering autocomplete
+
+We use `ctrl` + **`f`** and `ctrl` + **`r`** for cycling through autocompletes.
+
+**NOTE:** We don't use `tab`/`shift tab` (although it is widely used elsewhere) for cycling through matches. However, recall that we do use `tab` to cycle through recipient and content boxes. (See [hotkeys for composing a message](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md#composing-a-message))
+
+### Example: Using autocomplete to add a recognized emoji in your message body
+
+1. Type a prefix designated for an autocomplete (e.g., `:` for autocompleting emojis).
+2. Along with the prefix, type the initial letters of the text (e.g., `air` for `airplane`).
+3. Now hit the hotkey. You'd see suggestions being listed in the footer (a maximum of 10) if there are any.
+4. Cycle between different suggestions as described in above hotkey section. (Notice that a selected suggestion is highlighted)
+5. Cycling past the end of suggestions goes back to the prefix you entered (`:air` for this case).
+
+![selected_footer_autocomplete](https://user-images.githubusercontent.com/55916430/116669526-53cfb880-a9bc-11eb-8073-11b220e6f15a.gif)
+
+### Areas with autocomplete support
+
+* We use different prefixes in **message body** for autocompletes.
+* For **recipient body** (see 1, 2, 3 below) there is no prefix, and autocompletes are contextual.
+
+#### Message body autocompletes
+
+|Prefix Type|Prefix text(s)|Autocompleted text format|
+| :--- | :---: | :---: |
+|Users/Group mentions|`@`|`@*User group*` or `@**User name**`|
+|Mention a user|`@**`|`@**User name**`|
+|Mention a user group|`@*`|`@*User group*`|
+|Silently mention a user|`@_`, `@_**`|`@_**User name**`|
+|Get a stream|`#`, `#**`|`#**stream name**`|
+|Get an emoji|`:`|`:emoji_name:`|
+
+**NOTE:** Currently, the above autocompletes ignore a text containing whitespaces if it is specified as a prefix for autocompletion. (e.g., `#test he` wouldn't lead to `#**test here**`) See also [#925](https://github.com/zulip/zulip-terminal/issues/925).
+
+#### Stream (1) and Topic (2) autocomplete:
+
+![Stream header](https://user-images.githubusercontent.com/55916430/118403323-8e5b7580-b68b-11eb-9c8a-734c2fe6b774.png)
+
+**NOTE:** The stream box would indicate:
+* `#` (with stream color) if the stream is valid and public,
+* `P` (with stream color) if the stream is valid and private,
+* `✗` if the stream is invalid.
+
+#### Private message recipients autocomplete (3):
+
+![PM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
+
+**NOTE:** If a PM recipient's name contains comma(s) (`,`), they would currently be treated as comma-separated recipients.
+
 ## Unable to render symbols
 
 If some symbols don't render properly on your terminal, it could likely be because of the symbols not being supported on your terminal emulator and/or font.
