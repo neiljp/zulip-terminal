@@ -1552,8 +1552,7 @@ class MessageBox(urwid.Pile):
             # Set focus to topic box if message body editing is disabled.
             if not msg_body_edit_enabled:
                 write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
-                (write_box.header_write_box.
-                 focus_col) = write_box.FOCUS_HEADER_BOX_TOPIC
+                write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
