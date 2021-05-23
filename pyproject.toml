@@ -1,0 +1,23 @@
+[tool.black]
+# Default line-length, but use explicit value here since used for isort & flake8
+line-length = 88
+target-version = ['py36']
+
+skip-string-normalization = 1
+# This is required for vim plugin, in addition to the above line:
+string-normalization = false
+
+include = '''
+(
+ zulipterminal/
+|tests/
+)
+'''
+
+# Use force to disallow `black <file>`
+force-exclude = '''
+(
+ setup.py
+|zulipterminal/unicode_emojis.py  # generated file
+)
+'''
