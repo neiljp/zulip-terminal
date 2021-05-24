@@ -656,11 +656,8 @@ class TestMessageLinkButton:
         assert parsed_link == expected_parsed_link
         assert error == expected_error
 
-    @pytest.mark.parametrize([
-            'parsed_link',
-            'narrow_to_stream_called',
-            'narrow_to_topic_called',
-        ],
+    @pytest.mark.parametrize(
+        'parsed_link, narrow_to_stream_called, narrow_to_topic_called',
         [
             ({'narrow': 'stream',
               'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
@@ -699,9 +696,8 @@ class TestMessageLinkButton:
         assert (mocked_button.controller.narrow_to_topic.called
                 == narrow_to_topic_called)
 
-    @pytest.mark.parametrize(['error', 'set_footer_text_called',
-                              '_switch_narrow_to_called',
-                              'exit_popup_called'], [
+    @pytest.mark.parametrize(
+        'error, set_footer_text_called, _switch_narrow_to_called, exit_popup_called', [
             ('Some Validation Error', True, False, False),
             ('', False, True, True),
         ],
