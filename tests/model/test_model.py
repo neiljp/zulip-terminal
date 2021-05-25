@@ -64,9 +64,7 @@ class TestModel:
                                                    anchor=None)
         assert model.initial_data == initial_data
         assert model.server_version == initial_data['zulip_version']
-        assert model.server_feature_level == (
-            initial_data.get('zulip_feature_level')
-        )
+        assert model.server_feature_level == initial_data.get('zulip_feature_level')
         assert model.user_id == user_profile['user_id']
         assert model.user_full_name == user_profile['full_name']
         assert model.user_email == user_profile['email']
@@ -590,8 +588,7 @@ class TestModel:
             'client_gravatar': True,
             'narrow': json.dumps(model.narrow),
         }
-        (model.client.get_messages.
-         assert_called_once_with(message_filters=request))
+        model.client.get_messages.assert_called_once_with(message_filters=request)
         assert model.index == index_all_messages
         anchor = messages_successful_response['anchor']
         if anchor < 10000000000000000:
@@ -731,8 +728,7 @@ class TestModel:
             'property': 'is_muted',
             'value': value
         }]
-        (model.client.update_subscription_settings
-         .assert_called_once_with(request))
+        model.client.update_subscription_settings.assert_called_once_with(request)
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
 
@@ -853,9 +849,8 @@ class TestModel:
 
         assert len(self.controller.view.message_view.log) == 1  # Added "msg_w"
         model.notify_user.assert_called_once_with(event['message'])
-        (create_msg_box_list.
-         assert_called_once_with(model, [message_fixture['id']],
-                                 last_message=None))
+        create_msg_box_list.assert_called_once_with(
+                model, [message_fixture['id']], last_message=None)
 
     def test__handle_message_event_with_valid_log(self, mocker,
                                                   model, message_fixture):
@@ -1690,8 +1685,7 @@ class TestModel:
             'property': 'pin_to_top',
             'value': pin_to_top
         }]
-        (model.client.update_subscription_settings
-         .assert_called_once_with(request))
+        model.client.update_subscription_settings.assert_called_once_with(request)
 
     @pytest.mark.parametrize('narrow, event, called', [
         # Not in PM Narrow
