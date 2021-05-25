@@ -144,8 +144,7 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
         if messages_fetched:
-            (create_msg_box_list.
-             assert_called_once_with(msg_view.model, new_msg_ids))
+            create_msg_box_list.assert_called_once_with(msg_view.model, new_msg_ids)
             self.model.controller.update_screen.assert_called_once_with()
         else:
             create_msg_box_list.assert_not_called()
