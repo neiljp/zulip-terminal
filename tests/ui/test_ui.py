@@ -307,8 +307,7 @@ class TestView:
 
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
-        (view.stream_w.stream_search_box.set_edit_text
-         .assert_called_once_with(""))
+        view.stream_w.stream_search_box.set_edit_text.assert_called_once_with("")
         (view.controller.enter_editor_mode_with
          .assert_called_once_with(view.stream_w.stream_search_box))
 
