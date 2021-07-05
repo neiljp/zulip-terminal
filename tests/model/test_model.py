@@ -2292,6 +2292,47 @@ class TestModel:
         model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(
+        "initial_visual_notified_streams, event, final_visual_notified_streams",
+        [
+            (
+                {15, 19},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 15,
+                    "value": False,
+                },
+                {19},
+            ),
+            (
+                {15, 30},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": True,
+                },
+                {15, 19, 30},
+            ),
+        ],
+        ids=["remove_visual_notified_stream_15", "add_visual_notified_stream_19"],
+    )
+    def test__handle_subscription_event_visual_notifications(
+        self,
+        model,
+        initial_visual_notified_streams,
+        event,
+        final_visual_notified_streams,
+    ):
+        event["type"] = "subscription"
+        model.visual_notified_streams = initial_visual_notified_streams
+
+        model._handle_subscription_event(event)
+
+        assert model.visual_notified_streams == final_visual_notified_streams
+        model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize(
         "event, feature_level, stream_id, expected_subscribers",
         [
             (

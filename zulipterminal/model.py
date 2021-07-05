@@ -1053,6 +1053,14 @@ class Model:
                     sort_streams(self.pinned_streams)
                     self.controller.view.left_panel.update_stream_view()
                     self.controller.update_screen()
+                elif event.get("property", None) == "desktop_notifications":
+                    stream_id = event["stream_id"]
+
+                    if event["value"]:
+                        self.visual_notified_streams.add(stream_id)
+                    else:
+                        self.visual_notified_streams.remove(stream_id)
+                    self.controller.update_screen()
         elif event["op"] in ("peer_add", "peer_remove"):
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)
