@@ -1323,6 +1323,8 @@ class TestModel:
             "user_id",
             "vary_each_msg",
             "visual_notification_status",
+            "is_stream_muted",
+            "is_topic_muted",
             "types_when_notify_called",
         ],
         [
@@ -1330,12 +1332,44 @@ class TestModel:
                 5140,
                 {"flags": ["mentioned", "wildcard_mentioned"]},
                 True,
+                False,
+                False,
                 [],
             ),  # message_fixture sender_id is 5140
-            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream"]),
-            (5179, {"flags": []}, False, ["private"]),
+            (
+                5179,
+                {"flags": ["mentioned"]},
+                False,
+                False,
+                False,
+                ["stream", "private"],
+            ),
+            (
+                5179,
+                {"flags": ["wildcard_mentioned"]},
+                False,
+                False,
+                False,
+                ["stream", "private"],
+            ),
+            (
+                5179,
+                {"flags": []},
+                True,
+                False,
+                False,
+                ["stream"],
+            ),
+            (
+                5179,
+                {"flags": []},
+                False,
+                False,
+                False,
+                ["private"],
+            ),
+            (5140, {"flags": []}, True, True, True, ["stream"]),
+            (5179, {"flags": ["mentioned"]}, True, True, True, ["stream"]),
         ],
         ids=[
             "not_notified_since_self_message",
@@ -1343,6 +1377,8 @@ class TestModel:
             "notified_stream_and_private_since_wildcard_mentioned",
             "notified_stream_since_stream_has_desktop_notifications",
             "notified_private_since_private_message",
+            "not_notified_stream_since_muted_stream",
+            "notified_muted_stream_since_directly_mentioned",
         ],
     )
     def test_notify_users_calling_msg_type(
@@ -1353,6 +1389,8 @@ class TestModel:
         user_id,
         vary_each_msg,
         visual_notification_status,
+        is_stream_muted,
+        is_topic_muted,
         types_when_notify_called,
     ):
         message_fixture.update(vary_each_msg)
@@ -1361,6 +1399,8 @@ class TestModel:
             MODEL + ".is_visual_notifications_enabled",
             return_value=visual_notification_status,
         )
+        mocker.patch(MODEL + ".is_muted_stream", return_value=is_stream_muted)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=is_topic_muted)
         notify = mocker.patch(MODULE + ".notify")
 
         model.notify_user(message_fixture)
@@ -1368,7 +1408,7 @@ class TestModel:
         target = None
         if message_fixture["type"] in types_when_notify_called:
             who = message_fixture["type"]
-            if who == "stream":
+            if who == "stream" and not (is_stream_muted or is_topic_muted):
                 target = "PTEST -> Test"
             elif who == "private":
                 target = "you"

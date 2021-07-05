@@ -1154,7 +1154,11 @@ class Model:
             stream_id = message["stream_id"]
             if {"mentioned", "wildcard_mentioned"}.intersection(
                 set(message["flags"])
-            ) or self.is_visual_notifications_enabled(stream_id):
+            ) or (
+                self.is_visual_notifications_enabled(stream_id)
+                and not self.is_muted_stream(stream_id)
+                and not self.is_muted_topic(stream_id, message["subject"])
+            ):
                 recipient = "{display_recipient} -> {subject}".format(**message)
 
         if recipient:
