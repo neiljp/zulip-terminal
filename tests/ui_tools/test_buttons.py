@@ -32,9 +32,9 @@ class TestTopButton:
     def top_button(self, mocker):
         top_button = TopButton(
             controller=self.controller,
-            caption="caption",
+            prefix_markup=("style", "-"),
+            label_markup=("style", "caption"),
             show_function=self.show_function,
-            prefix_character="-",
             count=0,
         )
         return top_button
@@ -42,12 +42,10 @@ class TestTopButton:
     def test_init(self, mocker, top_button):
 
         assert top_button.controller == self.controller
-        assert top_button._caption == "caption"
+        assert top_button.prefix_markup == ("style", "-")
+        assert top_button.label_markup == ("style", "caption")
+        assert top_button.suffix_markup == (None, "")
         assert top_button.show_function == self.show_function
-        assert top_button.prefix_character == "-"
-        assert top_button.original_color is None
-        assert top_button.count == 0
-        assert top_button.count_style is None
 
         assert top_button._label.wrap == "ellipsis"
         assert top_button._label.get_cursor_coords("size") is None
@@ -74,22 +72,21 @@ class TestTopButton:
     def test_update_count(
         self, mocker, top_button, old_count, new_count, new_count_str, text_color
     ):
-        top_button.count = old_count
+        top_button.suffix_markup = (None, old_count)
         top_button.update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
-        top_button.update_count(new_count, text_color)
+        top_button.update_count(new_count)
 
-        top_button.update_widget.assert_called_once_with(
-            (top_button.count_style, new_count_str),
-            text_color,
-        )
+        top_button.suffix_markup = (None, new_count)
+        top_button.update_widget.assert_called_once_with()
 
     @pytest.mark.parametrize(
-        "prefix, expected_prefix", [("-", [" ", "-", " "]), ("", [" "])]
+        "prefix_markup, expected_prefix_markup",
+        [((None, "-"), [" ", (None, "-"), " "]), ((None, ""), [" "])],
     )
-    @pytest.mark.parametrize("text_color", ["color", None])
+    @pytest.mark.parametrize("label_markup", [("color", "caption"), (None, "caption")])
     @pytest.mark.parametrize(
-        "count_text, expected_suffix",
+        "suffix_markup, expected_suffix_markup",
         [
             (("color", "3"), [" ", ("color", "3"), " "]),
             (("color", ""), ["  "]),
@@ -101,28 +98,34 @@ class TestTopButton:
         self,
         mocker,
         top_button,
-        prefix,
-        expected_prefix,
-        text_color,
-        count_text,
-        expected_suffix,
+        prefix_markup,
+        expected_prefix_markup,
+        label_markup,
+        suffix_markup,
+        expected_suffix_markup,
     ):
-        top_button.prefix_character = prefix
+        top_button.prefix_markup = prefix_markup
+        top_button.label_markup = label_markup
+        top_button.suffix_markup = suffix_markup
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
 
-        top_button.update_widget(count_text, text_color)
+        top_button.update_widget()
 
-        top_button.button_prefix.set_text.assert_called_once_with(expected_prefix)
-        top_button.set_label.assert_called_once_with((text_color, top_button._caption))
-        top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
+        top_button.button_prefix.set_text.assert_called_once_with(
+            expected_prefix_markup
+        )
+        top_button.set_label.assert_called_once_with(top_button.label_markup)
+        top_button.button_suffix.set_text.assert_called_once_with(
+            expected_suffix_markup
+        )
 
 
 class TestStarredButton:
     def test_count_style_init_argument_value(self, mocker, count=10):
         starred_button = StarredButton(controller=mocker.Mock(), count=count)
-        assert starred_button.count_style == "starred_count"
+        assert starred_button.suffix_markup[0] == "starred_count"
 
 
 class TestStreamButton:
@@ -214,10 +217,9 @@ class TestTopicButton:
         )
 
         top_button.assert_called_once_with(
-            caption=title,
-            prefix_character="",
+            label_markup=(None, title),
+            suffix_markup=("unread_count", ""),
             show_function=mocker.ANY,  # partial
-            count_style="unread_count",
             **params,
         )
         assert topic_button.stream_name == stream_name
