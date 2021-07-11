@@ -2294,7 +2294,7 @@ class TestModel:
     @pytest.mark.parametrize(
         "initial_visual_notified_streams, event, final_visual_notified_streams",
         [
-            (
+            case(
                 {15, 19},
                 {
                     "property": "desktop_notifications",
@@ -2303,8 +2303,9 @@ class TestModel:
                     "value": False,
                 },
                 {19},
+                id="remove_visual_notified_stream_15:present",
             ),
-            (
+            case(
                 {15, 30},
                 {
                     "property": "desktop_notifications",
@@ -2313,9 +2314,31 @@ class TestModel:
                     "value": True,
                 },
                 {15, 19, 30},
+                id="add_visual_notified_stream_19:not_present",
+            ),
+            case(
+                {19},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 15,
+                    "value": False,
+                },
+                {19},
+                id="remove_visual_notified_stream_15:not_present",
+            ),
+            case(
+                {15, 19, 30},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": True,
+                },
+                {15, 19, 30},
+                id="add_visual_notified_stream_19:present",
             ),
         ],
-        ids=["remove_visual_notified_stream_15", "add_visual_notified_stream_19"],
     )
     def test__handle_subscription_event_visual_notifications(
         self,

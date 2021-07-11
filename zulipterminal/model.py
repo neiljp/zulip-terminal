@@ -1059,7 +1059,7 @@ class Model:
                     if event["value"]:
                         self.visual_notified_streams.add(stream_id)
                     else:
-                        self.visual_notified_streams.remove(stream_id)
+                        self.visual_notified_streams.discard(stream_id)
                     self.controller.update_screen()
         elif event["op"] in ("peer_add", "peer_remove"):
             # NOTE: ZFL 35 commit was not atomic with API change
