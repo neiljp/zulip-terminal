@@ -2353,7 +2353,6 @@ class TestModel:
         model._handle_subscription_event(event)
 
         assert model.visual_notified_streams == final_visual_notified_streams
-        model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "event, feature_level, stream_id, expected_subscribers",
