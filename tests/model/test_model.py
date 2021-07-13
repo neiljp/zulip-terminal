@@ -1040,10 +1040,8 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
-    @pytest.mark.parametrize(
-        "muted, visual_notification_enabled",
-        list(zip(powerset([1, 2, 99, 1000]), powerset([1, 2, 99, 1000]))),
-    )
+    @pytest.mark.parametrize("muted", powerset([99, 1000]))
+    @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
         self, initial_data, muted, visual_notification_enabled, model
     ):
