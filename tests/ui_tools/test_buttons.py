@@ -9,6 +9,7 @@ from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
+    DecodedPM,
     DecodedStream,
     EmojiButton,
     MessageLinkButton,
@@ -633,6 +634,58 @@ class TestMessageLinkButton:
         self, stream_data: str, expected_response: DecodedStream
     ) -> None:
         return_value = MessageLinkButton._decode_stream_data(stream_data)
+
+        assert return_value == expected_response
+
+    @pytest.mark.parametrize(
+        "pm_data, expected_response",
+        [
+            case(
+                "1001,12-pm",
+                dict(type=None, recipient_ids=[1001, 12], recipient_emails=None),
+                id="pm_with_two_recipients",
+            ),
+            case(
+                "1001,12-group",
+                dict(type=None, recipient_ids=[1001, 12], recipient_emails=None),
+                id="group_pm_with_two_recipients",
+            ),
+            case(
+                "1001,11,12-pm",
+                dict(type=None, recipient_ids=[1001, 11, 12], recipient_emails=None),
+                id="pm_with_more_than_two_recipients",
+            ),
+            case(
+                "1001,11,12-group",
+                dict(type=None, recipient_ids=[1001, 11, 12], recipient_emails=None),
+                id="group_pm_with_more_than_two_recipients",
+            ),
+            case(
+                "11-user11",
+                dict(type=None, recipient_ids=[11], recipient_emails=None),
+                id="pm_exposed_format_1_ordinary",
+            ),
+            case(
+                "11-user2",
+                dict(type=None, recipient_ids=[11], recipient_emails=None),
+                id="pm_exposed_format_1_ambiguous",
+            ),
+            case(
+                "5-bot-name",
+                dict(type=None, recipient_ids=[5], recipient_emails=None),
+                id="pm_with_bot_exposed_format_1_ordinary",
+            ),
+            case(
+                "5-bot;name",
+                dict(type=None, recipient_ids=[5], recipient_emails=None),
+                id="pm_with_bot_exposed_format_1_ambiguous",
+            ),
+        ],
+    )
+    def test__decode_pm_data(
+        self, mocker: MockerFixture, pm_data: str, expected_response: DecodedPM
+    ) -> None:
+        return_value = MessageLinkButton._decode_pm_data(pm_data)
 
         assert return_value == expected_response
 
