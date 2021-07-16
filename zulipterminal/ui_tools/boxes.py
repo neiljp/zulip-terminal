@@ -119,7 +119,7 @@ class WriteBox(urwid.Pile):
         self.view.controller.enter_editor_mode_with(self)
 
     def _set_regular_and_typing_recipient_user_ids(
-        self, user_id_list: Optional[List[int]] = None
+        self, user_id_list: Optional[List[int]]
     ) -> None:
         if user_id_list:
             self.recipient_user_ids = user_id_list
@@ -170,7 +170,7 @@ class WriteBox(urwid.Pile):
                 ]
             )
         else:
-            self._set_regular_and_typing_recipient_user_ids()
+            self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
             recipient_info = ""
 
