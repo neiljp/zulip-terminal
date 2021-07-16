@@ -672,6 +672,7 @@ class WriteBox(urwid.Pile):
             self.msg_edit_state = None
             self.msg_body_edit_enabled = True
             self.send_stop_typing_status()
+            self._set_regular_and_typing_recipient_user_ids(None)
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
