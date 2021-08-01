@@ -1008,15 +1008,16 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "parsed_link, narrow_to_stream_called, narrow_to_topic_called",
         [
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream",
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
                 ),
                 True,
                 False,
+                id="stream_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Foo",
@@ -1024,8 +1025,9 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                id="topic_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
@@ -1033,8 +1035,9 @@ class TestMessageLinkButton:
                 ),
                 True,
                 False,
+                id="stream_near_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="Foo",
@@ -1043,13 +1046,8 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                id="topic_near_narrow",
             ),
-        ],
-        ids=[
-            "stream_narrow",
-            "topic_narrow",
-            "stream_near_narrow",
-            "topic_near_narrow",
         ],
     )
     def test__switch_narrow_to(
