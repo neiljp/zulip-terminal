@@ -854,6 +854,7 @@ class TestMessageLinkButton:
         [
             "parsed_link",
             "is_user_subscribed_to_stream",
+            "is_valid_private_recipient",
             "is_valid_stream",
             "topics_in_stream",
             "expected_error",
@@ -864,6 +865,7 @@ class TestMessageLinkButton:
                     narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
                 ),
                 True,
+                None,
                 None,
                 None,
                 "",
@@ -877,6 +879,7 @@ class TestMessageLinkButton:
                 False,
                 None,
                 None,
+                None,
                 "The stream seems to be either unknown or unsubscribed",
                 id="invalid_modern_stream_narrow_parsed_link",
             ),
@@ -885,6 +888,7 @@ class TestMessageLinkButton:
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
                 ),
+                None,
                 None,
                 True,
                 None,
@@ -896,6 +900,7 @@ class TestMessageLinkButton:
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="foo"),
                 ),
+                None,
                 None,
                 False,
                 None,
@@ -910,6 +915,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "",
                 id="valid_topic_narrow_parsed_link",
@@ -921,6 +927,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 True,
+                None,
                 None,
                 [],
                 "Invalid topic name",
@@ -935,6 +942,7 @@ class TestMessageLinkButton:
                 True,
                 None,
                 None,
+                None,
                 "",
                 id="valid_stream_near_narrow_parsed_link",
             ),
@@ -945,6 +953,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 True,
+                None,
                 None,
                 None,
                 "Invalid message ID",
@@ -959,6 +968,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "",
                 id="valid_topic_near_narrow_parsed_link",
@@ -972,6 +982,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "Invalid message ID",
                 id="invalid_topic_near_narrow_parsed_link",
@@ -981,8 +992,98 @@ class TestMessageLinkButton:
                 None,
                 None,
                 None,
+                None,
                 "The narrow link seems to be either broken or unsupported",
                 id="invalid_narrow_link",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                ),  # ...
+                True,
+                None,
+                None,
+                None,
+                "",
+                id="valid_stream_data_with_stream_id",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=462, stream_name=None),
+                ),  # ...
+                False,
+                None,
+                None,
+                None,
+                "The stream seems to be either unknown or unsubscribed",
+                id="invalid_stream_data_with_stream_id",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                ),  # ...
+                None,
+                None,
+                True,
+                None,
+                "",
+                id="valid_stream_data_with_stream_name",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                ),  # ...
+                None,
+                None,
+                False,
+                None,
+                "The stream seems to be either unknown or unsubscribed",
+                id="invalid_stream_data_with_stream_name",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                True,
+                None,
+                None,
+                "",
+                id="valid_pm_data",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11, 12], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                True,
+                None,
+                None,
+                "",
+                id="valid_group_pm_data",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, -1], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                False,
+                None,
+                None,
+                "The PM has one or more invalid recipient(s)",
+                id="invalid_recipient",
             ),
         ],
     )
@@ -991,6 +1092,7 @@ class TestMessageLinkButton:
         stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
+        is_valid_private_recipient: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
         expected_error: str,
@@ -998,6 +1100,9 @@ class TestMessageLinkButton:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
+        )
+        self.controller.model.is_valid_private_recipient.return_value = (
+            is_valid_private_recipient
         )
         self.controller.model.is_valid_stream.return_value = is_valid_stream
         self.controller.model.topics_in_stream.return_value = topics_in_stream
