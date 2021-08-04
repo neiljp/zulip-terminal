@@ -9,7 +9,8 @@ from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
-    DecodedStream,
+    DecodedStreamAbsolute,
+    DecodedStreamPartial,
     EmojiButton,
     MessageLinkButton,
     ParsedNarrowLink,
@@ -621,8 +622,8 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "stream_data, expected_response",
         [
-            ("206-zulip-terminal", DecodedStream(stream_id=206, stream_name=None)),
-            ("Stream.201", DecodedStream(stream_id=None, stream_name="Stream 1")),
+            ("206-zulip-terminal", DecodedStreamPartial(stream_id=206)),
+            ("Stream.201", DecodedStreamPartial(stream_name="Stream 1")),
         ],
         ids=[
             "stream_data_current_version",
@@ -630,7 +631,7 @@ class TestMessageLinkButton:
         ],
     )
     def test__decode_stream_data(
-        self, stream_data: str, expected_response: DecodedStream
+        self, stream_data: str, expected_response: DecodedStreamPartial
     ) -> None:
         return_value = MessageLinkButton._decode_stream_data(stream_data)
 
@@ -656,7 +657,7 @@ class TestMessageLinkButton:
             case(
                 "/#narrow/stream/1-Stream-1",
                 ParsedNarrowLink(
-                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                    narrow="stream", stream_partial=DecodedStreamPartial(stream_id=1)
                 ),
                 id="modern_stream_narrow_link",
             ),
@@ -664,7 +665,7 @@ class TestMessageLinkButton:
                 "/#narrow/stream/Stream.201",
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),
                 id="deprecated_stream_narrow_link",
             ),
@@ -673,7 +674,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="foo bar",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 id="topic_narrow_link",
             ),
@@ -682,7 +683,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="foo bar",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 id="subject_narrow_link",
             ),
@@ -691,7 +692,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=987,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 id="stream_near_narrow_link",
             ),
@@ -701,7 +702,7 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="foo",
                     message_id=789,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 id="topic_near_narrow_link",
             ),
@@ -711,7 +712,7 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="foo",
                     message_id=654,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 id="subject_near_narrow_link",
             ),
@@ -771,7 +772,7 @@ class TestMessageLinkButton:
         [
             case(
                 ParsedNarrowLink(
-                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                    narrow="stream", stream_partial=DecodedStreamPartial(stream_id=1)
                 ),
                 True,
                 None,
@@ -783,7 +784,7 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=462, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=462),
                 ),
                 False,
                 None,
@@ -795,7 +796,7 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),
                 None,
                 True,
@@ -807,7 +808,7 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                    stream_partial=DecodedStreamPartial(stream_name="foo"),
                 ),
                 None,
                 False,
@@ -820,7 +821,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Valid",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -833,7 +834,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Valid",
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),
                 True,
                 True,
@@ -846,7 +847,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Invalid",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -859,7 +860,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Invalid",
-                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                    stream_partial=DecodedStreamPartial(stream_name="foo"),
                 ),
                 None,
                 False,
@@ -872,7 +873,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -885,7 +886,7 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=None,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -899,7 +900,7 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="Valid",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -913,7 +914,7 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="Valid",
                     message_id=None,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
@@ -968,21 +969,25 @@ class TestMessageLinkButton:
         [
             case(
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name=None)
+                    stream_partial=DecodedStreamPartial(stream_id=1)
                 ),  # ...
                 None,
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 id="stream_data_with_stream_id",
             ),
             case(
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1")
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),  # ...
                 1,
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 id="stream_data_with_stream_name",
             ),
@@ -1011,7 +1016,9 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 True,
                 False,
@@ -1021,7 +1028,9 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Foo",
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 False,
                 True,
@@ -1031,7 +1040,9 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 True,
                 False,
@@ -1042,7 +1053,9 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="Foo",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 False,
                 True,
