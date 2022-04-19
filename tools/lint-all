@@ -19,6 +19,7 @@ tools = {
     "Type consistency (mypy)": "./tools/run-mypy",
     "PEP8 & more (flake8)": ["flake8"] + python_sources,
     "Formatting (black)": ["black", "--check"] + python_sources,
+    "Docstring lint (docstrings match with developer-file-overview)": "./tools/lint-docstring",
 }
 
 for tool_name, command in tools.items():
