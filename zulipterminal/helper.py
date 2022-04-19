@@ -1,3 +1,7 @@
+"""
+Helper functions used in multiple places
+"""
+
 import os
 import time
 from collections import OrderedDict, defaultdict

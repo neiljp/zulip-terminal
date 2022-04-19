@@ -1,3 +1,6 @@
+"""
+Regular expression constants
+"""
 # All regexes with (*) are inspired from webapp's
 # zulip/static/js/composebox_typeahead.js
 
