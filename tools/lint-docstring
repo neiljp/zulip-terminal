@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
+import glob
 import importlib
 import pathlib
 import sys
-from os import listdir
-from os.path import isfile, join
-from typing import Dict, cast
+from os.path import basename, dirname, relpath
+from typing import Dict, Tuple, cast
 
 
 INITIAL_INDEX = 7
@@ -14,8 +14,15 @@ INITIAL_INDEX = 7
 # absolute path to zulip-terminal
 ROOT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
 
+# absolute path to zulip-terminal/zulipterminal to be passed as parameter
+ZULIPTERMINAL = ROOT_DIRECTORY / "zulipterminal"
+
+# absolute path to the folders under zulipterminal/ to be skipped while parsing
+THEMES_PATH = ZULIPTERMINAL / "themes"
+SCRIPTS_PATH = ZULIPTERMINAL / "scripts"
+
 # new doc file has been created for the time being to compare it with the original
-DEVELOPER_DOC = join(ROOT_DIRECTORY, "docs", "developer-file-overview_new.md")
+DEVELOPER_DOC = ROOT_DIRECTORY / "docs" / "developer-file-overview.md"
 
 COLUMN_WIDTHS = (23, 20, 103)
 SPACEBAR = " "
@@ -27,12 +34,13 @@ SCRIPTS = "zulipterminal/scripts"
 SCRIPTS_DESC = "Scripts bundled with the application"
 THEMES = "zulipterminal/themes"
 THEMES_DESC = "Themes bundled with the application"
-
 # leaving blank rows after exhausting files from each folder
-BLANK_LINE = f"| {23*SPACEBAR}| {20*SPACEBAR}| {103*SPACEBAR}|\n"
+BLANK_LINE = f"| {COLUMN_WIDTHS[0]*SPACEBAR}| {COLUMN_WIDTHS[1]*SPACEBAR}| {COLUMN_WIDTHS[2]*SPACEBAR}|\n"
 
 
-def column_text_with_spaces(column_text, columnwise_widths=COLUMN_WIDTHS):
+def column_text_with_spaces(
+    column_text, columnwise_widths=COLUMN_WIDTHS
+) -> Tuple[str, str, str]:
     """
     Returns the text parsed alongwith the adequate amount of spaces
     after the text
@@ -48,10 +56,10 @@ def column_text_with_spaces(column_text, columnwise_widths=COLUMN_WIDTHS):
     return (folder_name, file_name, file_desc)
 
 
-def write_to_file(list_of_new_files_to_add, current_doc_data, write_location) -> int:
+def write_to_file(list_of_new_files_to_add, current_doc_data, write_location) -> None:
     """
     Writes the list of rows containing folder name, file name(s) and their respective
-    descriptions to the developer-file-overview_new.md
+    descriptions to the developer-file-overview.md
     """
     current_doc_data[(write_location) : (write_location - 1)] = list_of_new_files_to_add
     write_location = write_location + len(list_of_new_files_to_add) + 1
@@ -59,67 +67,77 @@ def write_to_file(list_of_new_files_to_add, current_doc_data, write_location) ->
     updated_data = "".join(current_doc_data)
     with open(DEVELOPER_DOC, "w") as file:
         file.write(updated_data)
-    return write_location
 
 
-def get_docstrings() -> Dict[str, Dict[str, str]]:
+def extract_folder_file_structure() -> Dict[str, str]:
+    """
+    Returns dictionary containing folders and respective python files within them
+    """
+    # contains path to the folders to be parsed to search for files
+    folder_paths = {}
+    for path_to_folder in glob.glob(f"{ZULIPTERMINAL}/**", recursive=True):
+        directory_path = dirname(path_to_folder)
+        relative_path = relpath(directory_path, ROOT_DIRECTORY)
+        if directory_path != str(THEMES_PATH) and directory_path != str(SCRIPTS_PATH):
+            folder_paths[relative_path] = directory_path
+
+    folders_and_files = {}
+    for directory_name in folder_paths:
+        temp_list = []
+        for file in glob.glob(f"{folder_paths[directory_name]}/*.py", recursive=True):
+            if basename(file) != "__init__.py":
+                temp_list.append(basename(file))
+        folders_and_files[directory_name] = temp_list
+    return folders_and_files
+
+
+def extract_doctrings_from_files() -> Dict[str, Dict[str, str]]:
     """
     Returns a dictionary containing folder name which in turn
     is a dictionary containing files and their respective descriptons
     """
-    folder_paths = {
-        "zulipterminal": join(ROOT_DIRECTORY, "zulipterminal"),
-        "zulipterminal/cli": join(ROOT_DIRECTORY, "zulipterminal", "cli"),
-        "zulipterminal/config": join(ROOT_DIRECTORY, "zulipterminal", "config"),
-        "zulipterminal/ui_tools": join(ROOT_DIRECTORY, "zulipterminal", "ui_tools"),
-    }
-    total_files = {}
-    for folder, path in folder_paths.items():
-        total_files[folder] = [
-            file
-            for file in listdir(path)
-            if (isfile(join(path, file)) and file != "__init__.py")
-        ]
+    total_files = extract_folder_file_structure()
     folder_file_docstring: Dict[str, Dict[str, str]] = {}
-
-    for folder, files in total_files.items():
+    for folder, files in sorted(total_files.items()):
         folder_file_docstring[str(folder)] = {}
         for file in files:
             imported_file = importlib.import_module(
                 f'{folder.replace("/",".")}.{file[:-3]}'
             )
-            docstring = cast(str, imported_file.__doc__)
-            folder_file_docstring[str(folder)][file] = docstring.strip().replace(
-                "\n", " "
-            )
+            extracted_docstring = cast(str, imported_file.__doc__)
+            docstring = extracted_docstring.strip().replace("\n", " ")
+            if len(docstring) >= 104:
+                raise ValueError(f"{file} has docstring longer than 104")
+            folder_file_docstring[str(folder)][file] = docstring
     return folder_file_docstring
 
 
 def create_file() -> None:
     """
-    Creates the entire developer-file-overview_new.md document again
+    Creates the entire developer-file-overview.md document again
     by retaining the lines 1-6 and the rest from the docstrings in the files
     """
-    folder_file_docstring = get_docstrings()
+    folder_file_docstring = extract_doctrings_from_files()
     with open(DEVELOPER_DOC, "r+") as file:
         doc_data = file.readlines()
 
     # writing operation starts at index 7 as the table content starts from line 7
     write_location = INITIAL_INDEX
     doc_to_write = doc_data[: INITIAL_INDEX - 1]
+    files_and_docstrings_to_add = []
 
     for folder in folder_file_docstring:
         folder_name_added = False
-        dictionary_of_files = folder_file_docstring[str(folder)]
-        files_and_docstrings_to_add = []
+        dictionary_of_files = folder_file_docstring[folder]
 
-        folder_text = str(folder)
+        folder_text = folder
         for file in sorted(dictionary_of_files):
+            # description_text = folder_file_docstring[folder][file]
+            docstring = folder_file_docstring[folder][file]
             if folder_name_added is True:
                 # only the first row of a folder has the folder name, rest contain whitespace
                 folder_text = " "
-            file_text = str(file)
-            docstring = folder_file_docstring[str(folder)][str(file)]
+            file_text = file
             text_tuple = (folder_text, file_text, docstring)
             folder_name, file_name, desc = column_text_with_spaces(
                 text_tuple, COLUMN_WIDTHS
@@ -130,14 +148,10 @@ def create_file() -> None:
 
         # adding blank row at the end of every folder
         files_and_docstrings_to_add.append(BLANK_LINE)
-        write_location = write_to_file(
-            files_and_docstrings_to_add, doc_to_write, write_location
-        )
 
     # zulipterminal/scripts and zulipterminal/themes do not contain any files
     # hence they have been added manually after adding files and docstrings from
     # all other folders
-    folders_with_no_files = []
     SCRIPTS_TUPLE = (SCRIPTS, " ", SCRIPTS_DESC)
     folder_name, file_name, desc = column_text_with_spaces(SCRIPTS_TUPLE, COLUMN_WIDTHS)
     scripts_line = f"| {folder_name}| {file_name}| {desc}|\n"
@@ -146,15 +160,15 @@ def create_file() -> None:
     folder_name, file_name, desc = column_text_with_spaces(THEMES_TUPLE, COLUMN_WIDTHS)
     themes_line = f"| {folder_name}| {file_name}| {desc}|\n"
 
-    folders_with_no_files.append(scripts_line)
-    folders_with_no_files.append(BLANK_LINE)
-    folders_with_no_files.append(themes_line)
-    write_to_file(folders_with_no_files[-3:], doc_to_write, write_location)
+    files_and_docstrings_to_add.append(scripts_line)
+    files_and_docstrings_to_add.append(BLANK_LINE)
+    files_and_docstrings_to_add.append(themes_line)
+    write_to_file(files_and_docstrings_to_add, doc_to_write, write_location)
 
 
-def get_file_overview_doc_docstrings() -> Dict[str, Dict[str, str]]:
+def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
     """
-    Reads the developer-file-overview_new.md document and creates
+    Reads the developer-file-overview.md document and creates
     a dictionary containing folder name which in turn is a dictionary
     containing files and their respective descriptons
     """
@@ -163,7 +177,6 @@ def get_file_overview_doc_docstrings() -> Dict[str, Dict[str, str]]:
 
     computed_doc_dict: Dict[str, Dict[str, str]] = {}
 
-    folder_name = ""
     # table is present from line 6 to (length - 1)
     for i in range(INITIAL_INDEX - 1, len(doc_data) - 4):
         _, folder, filename, docstring, _ = str(doc_data[i]).split("|")
@@ -171,29 +184,43 @@ def get_file_overview_doc_docstrings() -> Dict[str, Dict[str, str]]:
         if folder:
             folder_name = folder
             computed_doc_dict[str(folder_name)] = {}
-        if filename:
-            computed_doc_dict[str(folder_name)][str(filename)] = docstring.strip()
+        if docstring.strip():
+            if filename:
+                file_name = filename
+                computed_doc_dict[folder_name][file_name] = docstring.strip()
+            else:
+                computed_doc_dict[folder_name][file_name] = (
+                    computed_doc_dict[folder_name][file_name]
+                    + SPACEBAR
+                    + docstring.strip()
+                )
     return computed_doc_dict
 
 
 def lint_files():
     """
-    Used for linting of the developer-file-overview_new.md document
+    Used for linting of the developer-file-overview.md document
     """
-    folder_file_docstring = get_docstrings()
-    computed_doc_dict = get_file_overview_doc_docstrings()
+    folder_file_docstring = extract_doctrings_from_files()
+    computed_doc_dict = extract_docstrings_from_file_overview()
+    missing_file = ""
     try:
-        for folder in computed_doc_dict:
-            assert folder_file_docstring[str(folder)] == computed_doc_dict[str(folder)]
+        for folder in folder_file_docstring:
+            for file in folder_file_docstring[folder]:
+                missing_file = file
+                assert (
+                    computed_doc_dict[folder][file]
+                    == folder_file_docstring[folder][file]
+                )
     except AssertionError:
         # in case the docstrings do not match
-        print("Docstrings changed")
-        print("Run './tools/lint-docstring -fix' to fix")
+        print(f"{missing_file} has docstrings changed")
+        print("Run './tools/lint-docstring --fix' to fix")
         sys.exit(1)
     except KeyError:
         # in case a new file is added and its docstring is not present in the document
-        print("New File has been added")
-        print("Run './tools/lint-docstring -fix' to fix")
+        print(f"{missing_file} has been added")
+        print("Run './tools/lint-docstring --fix' to fix")
         sys.exit(1)
     print("Successful")
 
@@ -201,20 +228,19 @@ def lint_files():
 def main(fix_file: bool = False) -> None:
     if fix_file:
         create_file()
-        print("Generated developer-file-overview_new.md successfully.\n")
+        print("Generated developer-file-overview.md successfully.")
     else:
         lint_files()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Lint and fix docstrings" "in all ZulipTerminal files"
+        description="Lint and fix docstrings in all ZulipTerminal files"
     )
     parser.add_argument(
-        "-fix",
+        "--fix",
         action="store_true",
-        help="""Update developer-file-overview with
-                        docstrings of all files""",
+        help="Update developer-file-overview with docstrings of all files",
     )
     args = parser.parse_args()
     main(args.fix)

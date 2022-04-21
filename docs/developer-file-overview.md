@@ -4,7 +4,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 
 | Folder                 | File                | Description                                                                                            |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| zulipterminal/         | api_types.py        | Preliminary Zulip API types defined in python, to allow type checking                                  |
+| zulipterminal          | api_types.py        | Preliminary Zulip API types defined in python, to allow type checking                                  |
 |                        | core.py             | Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application           |
 |                        | helper.py           | Helper functions used in multiple places                                                               |
 |                        | model.py            | Defines the `Model`, fetching and storing data retrieved from the Zulip server                         |
@@ -17,7 +17,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        |                     |                                                                                                        |
 | zulipterminal/cli      | run.py              | Marks the entry point into the application                                                             |
 |                        |                     |                                                                                                        |
-| zulipterminal/config   | color.py            | Color definitions or functions common across all themes                                                |
+| zulipterminal/config   | color.py            | Contains color definitions or functions common across all themes.                                      |
 |                        | keys.py             | Keybindings and their helper functions                                                                 |
 |                        | markdown_examples.py| Examples of input markdown and corresponding html output (rendered in markdown help)                   |
 |                        | regexes.py          | Regular expression constants                                                                           |
