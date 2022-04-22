@@ -113,8 +113,9 @@ jobs:
           git checkout -b branch_under_test;
           git log -1;
           git fetch https://github.com/zulip/zulip-terminal main ;
-          git checkout FETCH_HEAD && git switch -c upstream;
+          git checkout FETCH_HEAD;
+          git branch current_main;
           git log -1;
           git checkout branch_under_test;
           git log -1;
-          git rebase upstream --exec 'git log -1 && make check';
+          git rebase current_main --exec 'git log -1 && make check';
