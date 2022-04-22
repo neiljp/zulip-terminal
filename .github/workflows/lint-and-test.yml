@@ -97,3 +97,16 @@ jobs:
         uses: codecov/codecov-action@v2
         # We avoid extra work by just running codecov on one python version
         if: matrix.env.CODECOV
+
+  all-commits:
+    runs-on: ubuntu-latest
+    name: Test all commits
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: Install with linting tools
+        run: pip install .[dev]
+      - name: Check each commit
+        run: git fetch upstream && git rebase $(git merge-base upstream/main @) --exec 'git log -1 && make check'
