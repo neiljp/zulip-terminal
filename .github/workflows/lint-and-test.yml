@@ -110,8 +110,9 @@ jobs:
         run: pip install .[dev]
       - name: Check each commit
         run:
+          git checkout -b branch_under_test;
           git log -1;
           git fetch https://github.com/zulip/zulip-terminal main ;
-          git status;
+          git checkout FETCH_HEAD && git checkout -b upstream;
           git log -1;
-          git rebase $(git merge-base HEAD~3 @) --exec 'git log -1 && make check';
+          git rebase $(git merge-base upstream branch_under_test) --exec 'git log -1 && make check';
