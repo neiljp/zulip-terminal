@@ -115,4 +115,6 @@ jobs:
           git fetch https://github.com/zulip/zulip-terminal main ;
           git checkout FETCH_HEAD && git switch -c upstream;
           git log -1;
-          git rebase $(git merge-base upstream branch_under_test) --exec 'git log -1 && make check';
+          git checkout branch_under_test;
+          git log -1;
+          git rebase upstream --exec 'git log -1 && make check';
