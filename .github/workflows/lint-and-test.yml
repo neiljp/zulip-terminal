@@ -109,4 +109,4 @@ jobs:
       - name: Install with linting tools
         run: pip install .[dev]
       - name: Check each commit
-        run: git fetch git://github.com/zulip/zulip-terminal main && git rebase $(git merge-base FETCH_HEAD @) --exec 'git log -1 && make check'
+        run: git fetch https://github.com/zulip/zulip-terminal main && git rebase $(git merge-base FETCH_HEAD @) --exec 'git log -1 && make check'
