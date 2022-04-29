@@ -30,10 +30,11 @@ SPACEBAR = " "
 # zulipterminal/scripts and zulipterminal/themes do not have any files
 # mentioned in the file-overview. Hence, their description has been
 # added separately.
-SCRIPTS = "zulipterminal/scripts"
-SCRIPTS_DESC = "Scripts bundled with the application"
-THEMES = "zulipterminal/themes"
-THEMES_DESC = "Themes bundled with the application"
+DOCSTRINGS_FOR_NO_FILE_FOLDERS = {
+    "zulipterminal/themes": "Themes bundled with the application",
+    "zulipterminal/scripts": "Scripts bundled with the application",
+}
+
 # leaving blank rows after exhausting files from each folder
 BLANK_LINE = f"| {COLUMN_WIDTHS[0]*SPACEBAR}| {COLUMN_WIDTHS[1]*SPACEBAR}| {COLUMN_WIDTHS[2]*SPACEBAR}|\n"
 
@@ -63,7 +64,6 @@ def write_to_file(list_of_new_files_to_add, current_doc_data, write_location) ->
     """
     current_doc_data[(write_location) : (write_location - 1)] = list_of_new_files_to_add
     write_location = write_location + len(list_of_new_files_to_add) + 1
-    # write_location += 1
     updated_data = "".join(current_doc_data)
     with open(DEVELOPER_DOC, "w") as file:
         file.write(updated_data)
@@ -78,7 +78,7 @@ def extract_folder_file_structure() -> Dict[str, str]:
     for path_to_folder in glob.glob(f"{ZULIPTERMINAL}/**", recursive=True):
         directory_path = dirname(path_to_folder)
         relative_path = relpath(directory_path, ROOT_DIRECTORY)
-        if directory_path != str(THEMES_PATH) and directory_path != str(SCRIPTS_PATH):
+        if relative_path not in DOCSTRINGS_FOR_NO_FILE_FOLDERS:
             folder_paths[relative_path] = directory_path
 
     folders_and_files = {}
@@ -106,13 +106,15 @@ def extract_doctrings_from_files() -> Dict[str, Dict[str, str]]:
             )
             extracted_docstring = cast(str, imported_file.__doc__)
             docstring = extracted_docstring.strip().replace("\n", " ")
-            if len(docstring) >= 104:
-                raise ValueError(f"{file} has docstring longer than 104")
+            if len(docstring) >= COLUMN_WIDTHS[2] + 1:
+                raise ValueError(
+                    f"{file} has docstring longer than {int(COLUMN_WIDTHS[2])+1}"
+                )
             folder_file_docstring[str(folder)][file] = docstring
     return folder_file_docstring
 
 
-def create_file() -> None:
+def create_file_overview_doc() -> None:
     """
     Creates the entire developer-file-overview.md document again
     by retaining the lines 1-6 and the rest from the docstrings in the files
@@ -149,21 +151,20 @@ def create_file() -> None:
         # adding blank row at the end of every folder
         files_and_docstrings_to_add.append(BLANK_LINE)
 
-    # zulipterminal/scripts and zulipterminal/themes do not contain any files
-    # hence they have been added manually after adding files and docstrings from
-    # all other folders
-    SCRIPTS_TUPLE = (SCRIPTS, " ", SCRIPTS_DESC)
-    folder_name, file_name, desc = column_text_with_spaces(SCRIPTS_TUPLE, COLUMN_WIDTHS)
-    scripts_line = f"| {folder_name}| {file_name}| {desc}|\n"
-
-    THEMES_TUPLE = (THEMES, " ", THEMES_DESC)
-    folder_name, file_name, desc = column_text_with_spaces(THEMES_TUPLE, COLUMN_WIDTHS)
-    themes_line = f"| {folder_name}| {file_name}| {desc}|\n"
-
-    files_and_docstrings_to_add.append(scripts_line)
-    files_and_docstrings_to_add.append(BLANK_LINE)
-    files_and_docstrings_to_add.append(themes_line)
-    write_to_file(files_and_docstrings_to_add, doc_to_write, write_location)
+    # Folders that do not contain any files with docstrings are added separately to the file-overview
+    for skipped_folder_name in sorted(DOCSTRINGS_FOR_NO_FILE_FOLDERS):
+        skipped_folder_tuple = (
+            skipped_folder_name,
+            " ",
+            DOCSTRINGS_FOR_NO_FILE_FOLDERS[skipped_folder_name],
+        )
+        folder_name, file_name, desc = column_text_with_spaces(
+            skipped_folder_tuple, COLUMN_WIDTHS
+        )
+        new_line = f"| {folder_name}| {file_name}| {desc}|\n"
+        files_and_docstrings_to_add.append(new_line)
+        files_and_docstrings_to_add.append(BLANK_LINE)
+    write_to_file(files_and_docstrings_to_add[:-1], doc_to_write, write_location)
 
 
 def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
@@ -178,7 +179,7 @@ def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
     computed_doc_dict: Dict[str, Dict[str, str]] = {}
 
     # table is present from line 6 to (length - 1)
-    for i in range(INITIAL_INDEX - 1, len(doc_data) - 4):
+    for i in range(INITIAL_INDEX - 1, len(doc_data)):
         _, folder, filename, docstring, _ = str(doc_data[i]).split("|")
         folder, filename = folder.strip(), filename.strip()
         if folder:
@@ -186,40 +187,42 @@ def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
             computed_doc_dict[str(folder_name)] = {}
         if docstring.strip():
             if filename:
-                file_name = filename
-                computed_doc_dict[folder_name][file_name] = docstring.strip()
+                computed_doc_dict[folder_name][filename] = docstring.strip()
             else:
-                computed_doc_dict[folder_name][file_name] = (
-                    computed_doc_dict[folder_name][file_name]
-                    + SPACEBAR
-                    + docstring.strip()
-                )
+                computed_doc_dict[folder_name]["no_file_present"] = docstring.strip()
     return computed_doc_dict
 
 
-def lint_files():
+def lint_file_overview():
     """
     Used for linting of the developer-file-overview.md document
     """
     folder_file_docstring = extract_doctrings_from_files()
     computed_doc_dict = extract_docstrings_from_file_overview()
-    missing_file = ""
+    missing_entity = ""
     try:
         for folder in folder_file_docstring:
             for file in folder_file_docstring[folder]:
-                missing_file = file
+                missing_entity = file
                 assert (
                     computed_doc_dict[folder][file]
                     == folder_file_docstring[folder][file]
                 )
+        # zulipterminal/themes and zulipterminal/scripts are linted using DOCSTRINGS_FOR_NO_FILE_FOLDERS
+        for folder_name in DOCSTRINGS_FOR_NO_FILE_FOLDERS:
+            missing_entity = folder_name
+            assert (
+                computed_doc_dict[folder_name]["no_file_present"]
+                == DOCSTRINGS_FOR_NO_FILE_FOLDERS[folder_name]
+            )
     except AssertionError:
         # in case the docstrings do not match
-        print(f"{missing_file} has docstrings changed")
+        print(f"{missing_entity}: docstrings have been changed")
         print("Run './tools/lint-docstring --fix' to fix")
         sys.exit(1)
     except KeyError:
         # in case a new file is added and its docstring is not present in the document
-        print(f"{missing_file} has been added")
+        print(f"{missing_entity}: docstrings have been added")
         print("Run './tools/lint-docstring --fix' to fix")
         sys.exit(1)
     print("Successful")
@@ -227,10 +230,10 @@ def lint_files():
 
 def main(fix_file: bool = False) -> None:
     if fix_file:
-        create_file()
+        create_file_overview_doc()
         print("Generated developer-file-overview.md successfully.")
     else:
-        lint_files()
+        lint_file_overview()
 
 
 if __name__ == "__main__":
