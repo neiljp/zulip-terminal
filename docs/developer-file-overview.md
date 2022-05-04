@@ -15,7 +15,9 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | urwid_types.py      | Preliminary urwid types to improve type analysis                                                       |
 |                        | version.py          | Keeps track of the version of the current code                                                         |
 |                        |                     |                                                                                                        |
+|                        |                     |                                                                                                        |
 | zulipterminal/cli      | run.py              | Marks the entry point into the application                                                             |
+|                        |                     |                                                                                                        |
 |                        |                     |                                                                                                        |
 | zulipterminal/config   | color.py            | Contains color definitions or functions common across all themes.                                      |
 |                        | keys.py             | Keybindings and their helper functions                                                                 |
@@ -26,11 +28,15 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | ui_mappings.py      | Relationships between state/API data and presentation in the UI                                        |
 |                        | ui_sizes.py         | Fixed sizes of UI elements                                                                             |
 |                        |                     |                                                                                                        |
+|                        |                     |                                                                                                        |
+|                        |                     |                                                                                                        |
+|                        |                     |                                                                                                        |
 | zulipterminal/ui_tools | boxes.py            | UI boxes for displaying messages and entering text, such as `MessageBox`, `SearchBox`, `WriteBox`, etc.|
 |                        | buttons.py          | UI buttons for 'narrowing' and showing unread counts, such as Stream, PM, Topic, Home, Starred, etc    |
 |                        | tables.py           | Helper functions which render tables in the UI                                                         |
 |                        | utils.py            | The `MessageBox` for every message displayed is created here                                           |
 |                        | views.py            | UI views for larger elements such as Streams, Messages, Topics, Help, etc                              |
+|                        |                     |                                                                                                        |
 |                        |                     |                                                                                                        |
 | zulipterminal/scripts  |                     | Scripts bundled with the application                                                                   |
 |                        |                     |                                                                                                        |
