@@ -636,10 +636,30 @@ class WriteBox(urwid.Pile):
 
         prefix_length = len(prefix_string)
 
-        matched_data = match_stream(
+        _, matched_streams = match_stream(
             stream_data, text[prefix_length:], self.view.pinned_streams
         )
-        return matched_data
+
+        muted_stream_names = [
+            stream_name
+            for stream_name in matched_streams
+            if stream_name
+            in [
+                self.model.stream_dict[stream_id]["name"]
+                for stream_id in self.model.muted_streams
+            ]
+        ]
+        pinned_streams = [stream["name"] for stream in self.view.pinned_streams]
+        pinned_unpinned_separator = len(set(pinned_streams) & set(matched_streams))
+        for muted_stream in muted_stream_names:
+            matched_streams.remove(muted_stream)
+            if muted_stream in pinned_streams:
+                matched_streams.insert(pinned_unpinned_separator - 1, muted_stream)
+            else:
+                matched_streams.append(muted_stream)
+
+        matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
+        return matched_stream_typeaheads, matched_streams
 
     def autocomplete_stream_and_topic(
         self, text: str, prefix_string: str
