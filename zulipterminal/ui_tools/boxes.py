@@ -660,6 +660,14 @@ class WriteBox(urwid.Pile):
             else:
                 matched_streams.append(matching_muted_stream)
 
+        if self.model.stream_dict.get(self.stream_id, None) is not None:
+            current_stream_name = self.model.stream_dict.get(self.stream_id, None)[
+                "name"
+            ]
+            if current_stream_name in matched_streams:
+                matched_streams.remove(current_stream_name)
+                matched_streams.insert(0, current_stream_name)
+
         matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
         return matched_stream_typeaheads, matched_streams
 
