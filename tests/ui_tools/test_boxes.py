@@ -894,14 +894,7 @@ class TestWriteBox:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
         write_box.model.stream_dict = stream_dict
-        streams_to_mute = set(
-            stream["stream_id"]
-            for stream in stream_dict.values()
-            if "muted" in stream_categories
-            for stream_id in stream_categories["muted"]
-            if stream["stream_id"] == stream_id
-        )
-        write_box.model.muted_streams = streams_to_mute
+        write_box.model.muted_streams = stream_categories.get("muted", set())
         for state, required_typeahead in state_and_required_typeahead.items():
             typeahead_string = write_box.generic_autocomplete(text, state)
             assert typeahead_string == required_typeahead
