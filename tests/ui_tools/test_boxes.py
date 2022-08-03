@@ -933,14 +933,11 @@ class TestWriteBox:
         write_box.view.pinned_streams = streams_to_pin
         write_box.stream_id = stream_categories.get("current_stream", None)
         write_box.model.stream_dict = stream_dict
-        streams_to_mute = set(
+        write_box.model.muted_streams = set(
             stream["stream_id"]
             for stream in stream_dict.values()
-            if "muted" in stream_categories
-            for stream_name in stream_categories["muted"]
-            if stream["name"] == stream_name
+            if stream["name"] in stream_categories.get("muted", set())
         )
-        write_box.model.muted_streams = streams_to_mute
         for state, required_typeahead in state_and_required_typeahead.items():
             typeahead_string = write_box.generic_autocomplete(text, state)
             assert typeahead_string == required_typeahead
