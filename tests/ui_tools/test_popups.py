@@ -284,10 +284,16 @@ class TestUserInfoView:
         [
             case({}, "Email", "person2@example.com"),
             case({"email": ""}, "Email", None),
-            case({"date_joined": "2021-03-18 16:52:48"}, "Date joined", "2021-03-18"),
+            case(
+                {"date_joined": "2021-03-18 16:52:48"},
+                "Date joined",
+                "2021-03-18",
+            ),
             case({}, "Date joined", None),
             case(
-                {"timezone": "America/Los_Angeles"}, "Timezone", "America/Los Angeles"
+                {"timezone": "America/Los_Angeles"},
+                "Timezone",
+                "America/Los Angeles",
             ),
             case({}, "Timezone", None),
             case(
@@ -302,10 +308,26 @@ class TestUserInfoView:
                 "Tue Mar 13 10:55:22",
             ),
             case({}, "Last active", None),
-            case({"is_bot": True, "bot_type": 1}, "Role", "Generic Bot"),
-            case({"is_bot": True, "bot_type": 2}, "Role", "Incoming Webhook Bot"),
-            case({"is_bot": True, "bot_type": 3}, "Role", "Outgoing Webhook Bot"),
-            case({"is_bot": True, "bot_type": 4}, "Role", "Embedded Bot"),
+            case(
+                {"is_bot": True, "bot_type": 1},
+                "Role",
+                "Generic Bot",
+            ),
+            case(
+                {"is_bot": True, "bot_type": 2},
+                "Role",
+                "Incoming Webhook Bot",
+            ),
+            case(
+                {"is_bot": True, "bot_type": 3},
+                "Role",
+                "Outgoing Webhook Bot",
+            ),
+            case(
+                {"is_bot": True, "bot_type": 4},
+                "Role",
+                "Embedded Bot",
+            ),
             case({"role": 100}, "Role", "Owner"),
             case({"role": 200}, "Role", "Administrator"),
             case({"role": 300}, "Role", "Moderator"),
