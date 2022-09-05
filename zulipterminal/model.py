@@ -980,30 +980,31 @@ class Model:
         full_name = api_user_data.get("full_name", "(No name)")
         email = api_user_data.get("email", "")
         date_joined = api_user_data.get("date_joined", "")
-        timezone = api_user_data.get("timezone", "")
-
-        presences_for_email = self.initial_data["presences"].get(email, None)
-        if presences_for_email is not None:
-            timestamp = presences_for_email["aggregated"]["timestamp"]
-
-            # Take 24h vs AM/PM format into consideration
-            last_active = self.formatted_local_time(timestamp, show_seconds=True)
-        else:
-            last_active = ""
 
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo
 
         raw_is_bot = api_user_data.get("is_bot", False)
         if raw_is_bot is False:
+            timezone = api_user_data.get("timezone", "")
+
+            presences_for_email = self.initial_data["presences"].get(email, None)
+            if presences_for_email is not None:
+                timestamp = presences_for_email["aggregated"]["timestamp"]
+
+                # Take 24h vs AM/PM format into consideration
+                last_active = self.formatted_local_time(timestamp, show_seconds=True)
+            else:
+                last_active = ""
+
             user_info = TidiedRegularUserInfo(
                 full_name=full_name,
                 email=email,
                 date_joined=date_joined,
-                timezone=timezone,
                 role=user_role,
-                last_active=last_active,
                 is_bot=False,
+                timezone=timezone,
+                last_active=last_active,
             )
         else:
             # Ensure backwards compatibility with "bot_owner" (which is email of owner)
@@ -1027,9 +1028,7 @@ class Model:
                 full_name=full_name,
                 email=email,
                 date_joined=date_joined,
-                timezone=timezone,
                 role=user_role,
-                last_active=last_active,
                 is_bot=True,
                 bot_type=bot_type,
                 bot_owner_name=bot_owner_name,

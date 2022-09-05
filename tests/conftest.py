@@ -156,9 +156,9 @@ def tidied_user_info_response_user() -> TidiedRegularUserInfo:
         "full_name": "Human 2",
         "email": "person2@example.com",
         "date_joined": "",
-        "timezone": "",
-        "is_bot": False,
         "role": 400,
+        "is_bot": False,
+        "timezone": "",
         "last_active": "",
     }
 
@@ -170,12 +170,10 @@ def tidied_user_info_response_bot() -> TidiedBotUserInfo:
         "full_name": "Notification Bot",
         "email": "notification-bot@zulip.com",
         "date_joined": "2015-12-28T19:58:29.035543+00:00",
-        "timezone": "",
-        "is_bot": True,
         "role": 400,
+        "is_bot": True,
         "bot_type": 1,
         "bot_owner_name": "",
-        "last_active": "",
     }
 
 

@@ -67,13 +67,14 @@ class BaseTidiedUserInfo(TypedDict):
     full_name: str
     email: str
     date_joined: str
-    timezone: str
     role: int
-    last_active: str
 
 
 class TidiedRegularUserInfo(BaseTidiedUserInfo):
     is_bot: Literal[False]
+
+    timezone: str
+    last_active: str
 
 
 class TidiedBotUserInfo(BaseTidiedUserInfo):
