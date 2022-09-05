@@ -1564,8 +1564,6 @@ class TestModel:
                 id="user_timezone",
             ),
             case({}, "timezone", "", id="user_empty_timezone"),
-            case({"bot_type": 1}, "bot_type", 1, id="user_bot_type"),
-            case({}, "bot_type", None, id="user_empty_bot_type"),
             case({"role": 100}, "role", 100, id="user_is_owner:Zulip_4.0+_ZFL59"),
             case({"role": 200}, "role", 200, id="user_is_admin:Zulip_4.0+_ZFL59"),
             case({"role": 300}, "role", 300, id="user_is_moderator:Zulip_4.0+_ZFL60"),
@@ -1575,19 +1573,21 @@ class TestModel:
             case({"is_admin": True}, "role", 200, id="user_is_admin:preZulip_4.0"),
             case({"is_guest": True}, "role", 600, id="user_is_guest:preZulip_4.0"),
             case({"is_bot": True}, "is_bot", True, id="user_is_bot"),
+            case({"is_bot": True, "bot_type": 1}, "bot_type", 1, id="user_bot_type"),
+            case({"is_bot": True}, "bot_type", None, id="user_empty_bot_type"),
             case(
-                {"bot_owner_id": 12},
+                {"is_bot": True, "bot_owner_id": 12},
                 "bot_owner_name",
                 "Human 2",
                 id="user_bot_has_owner:Zulip_3.0+_ZFL1",
             ),
             case(
-                {"bot_owner": "person2@example.com"},
+                {"is_bot": True, "bot_owner": "person2@example.com"},
                 "bot_owner_name",
                 "Human 2",
                 id="user_bot_has_owner:preZulip_3.0",
             ),
-            case({}, "bot_owner_name", "", id="user_bot_has_no_owner"),
+            case({"is_bot": True}, "bot_owner_name", "", id="user_bot_has_no_owner"),
         ],
     )
     def test_get_user_info(
@@ -1609,11 +1609,17 @@ class TestModel:
     def test_get_user_info_USER_NOT_FOUND(self, model):
         assert model.get_user_info(-1) is None
 
-    def test_get_user_info_sample_response(
-        self, model, _all_users_by_id, tidied_user_info_response
+    def test_get_user_info_sample_response_user(
+        self, model, _all_users_by_id, tidied_user_info_response_user
     ):
         model._all_users_by_id = _all_users_by_id
-        assert model.get_user_info(12) == tidied_user_info_response
+        assert model.get_user_info(12) == tidied_user_info_response_user
+
+    def test_get_user_info_sample_response_bot(
+        self, model, _all_users_by_id, tidied_user_info_response_bot
+    ):
+        model._all_users_by_id = _all_users_by_id
+        assert model.get_user_info(5) == tidied_user_info_response_bot
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict, user_id):
         mocker.patch(MODEL + ".get_messages", return_value="")

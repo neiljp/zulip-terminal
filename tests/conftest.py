@@ -12,7 +12,7 @@ from zulipterminal.config.keys import (
     keys_for_command,
     primary_key_for_command,
 )
-from zulipterminal.helper import Index, TidiedUserInfo
+from zulipterminal.helper import Index, TidiedBotUserInfo, TidiedRegularUserInfo
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
@@ -150,7 +150,7 @@ def users_fixture(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 @pytest.fixture
-def tidied_user_info_response() -> TidiedUserInfo:
+def tidied_user_info_response_user() -> TidiedRegularUserInfo:
     # FIXME: Refactor this to use a more generic user?
     return {
         "full_name": "Human 2",
@@ -159,7 +159,21 @@ def tidied_user_info_response() -> TidiedUserInfo:
         "timezone": "",
         "is_bot": False,
         "role": 400,
-        "bot_type": None,
+        "last_active": "",
+    }
+
+
+@pytest.fixture
+def tidied_user_info_response_bot() -> TidiedBotUserInfo:
+    # FIXME: Refactor this to use a more generic user?
+    return {
+        "full_name": "Notification Bot",
+        "email": "notification-bot@zulip.com",
+        "date_joined": "2015-12-28T19:58:29.035543+00:00",
+        "timezone": "",
+        "is_bot": True,
+        "role": 400,
+        "bot_type": 1,
         "bot_owner_name": "",
         "last_active": "",
     }
@@ -662,6 +676,7 @@ def initial_data(
                 "user_id": 5,
                 "is_admin": False,
                 "avatar_url": "dummy_avatar_url",
+                "bot_type": 1,
             },
             {
                 "full_name": "Email Gateway",
@@ -672,6 +687,7 @@ def initial_data(
                 "user_id": 6,
                 "is_admin": False,
                 "avatar_url": "dummy_avatar_url",
+                "bot_type": 1,
             },
             {
                 "full_name": "Welcome Bot",
@@ -682,6 +698,7 @@ def initial_data(
                 "user_id": 4,
                 "is_admin": False,
                 "avatar_url": "dummy_avatar_url",
+                "bot_type": 1,
             },
             {
                 "full_name": "Zulip Feedback Bot",
@@ -692,6 +709,7 @@ def initial_data(
                 "user_id": 1,
                 "is_admin": False,
                 "avatar_url": "dummy_avatar_url",
+                "bot_type": 1,
             },
         ],
         "subscriptions": streams_fixture,

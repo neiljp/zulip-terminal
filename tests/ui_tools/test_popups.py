@@ -252,7 +252,7 @@ class TestAboutView:
 class TestUserInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(
-        self, mocker: MockerFixture, tidied_user_info_response: TidiedUserInfo
+        self, mocker: MockerFixture, tidied_user_info_response_user: TidiedUserInfo
     ) -> None:
         self.controller = mocker.Mock()
         mocker.patch.object(
@@ -260,7 +260,7 @@ class TestUserInfoView:
         )
         mocker.patch(MODULE + ".urwid.SimpleFocusListWalker", return_value=[])
 
-        self.user_data = tidied_user_info_response
+        self.user_data = tidied_user_info_response_user
 
         mocker.patch.object(
             self.controller.model, "get_user_info", return_value=self.user_data
@@ -299,19 +299,24 @@ class TestUserInfoView:
             ),
             case({}, "Timezone", None, id="user_empty_timezone"),
             case(
-                {"is_bot": True, "bot_type": 1, "bot_owner_name": "Test Owner"},
-                "Owner",
-                "Test Owner",
-                id="user_bot_owner",
-            ),
-            case({}, "Owner", None, id="user_empty_bot_owner"),
-            case(
                 {"last_active": "Tue Mar 13 10:55:22"},
                 "Last active",
                 "Tue Mar 13 10:55:22",
                 id="user_last_active",
             ),
             case({}, "Last active", None, id="user_empty_last_active"),
+            case({"role": 100}, "Role", "Owner", id="user_is_owner"),
+            case({"role": 200}, "Role", "Administrator", id="user_is_admin"),
+            case({"role": 300}, "Role", "Moderator", id="user_is_moderator"),
+            case({"role": 600}, "Role", "Guest", id="user_is_guest"),
+            case({"role": 400}, "Role", "Member", id="user_is_member"),
+            case(
+                {"is_bot": True, "bot_type": 1, "bot_owner_name": "Test Owner"},
+                "Owner",
+                "Test Owner",
+                id="user_bot_owner",
+            ),
+            case({"is_bot": True}, "Owner", None, id="user_empty_bot_owner"),
             case(
                 {"is_bot": True, "bot_type": 1},
                 "Role",
@@ -336,21 +341,20 @@ class TestUserInfoView:
                 "Embedded Bot",
                 id="user_is_embedded_bot",
             ),
-            case({"role": 100}, "Role", "Owner", id="user_is_owner"),
-            case({"role": 200}, "Role", "Administrator", id="user_is_admin"),
-            case({"role": 300}, "Role", "Moderator", id="user_is_moderator"),
-            case({"role": 600}, "Role", "Guest", id="user_is_guest"),
-            case({"role": 400}, "Role", "Member", id="user_is_member"),
         ],
     )
     def test__fetch_user_data(
         self,
         mocker: MockerFixture,
+        tidied_user_info_response_bot: TidiedUserInfo,
         to_vary_in_each_user: Dict[str, Any],
         expected_key: str,
         expected_value: Optional[str],
     ) -> None:
-        data = dict(self.user_data, **to_vary_in_each_user)
+        if to_vary_in_each_user.get("is_bot", False) is True:
+            data = dict(tidied_user_info_response_bot, **to_vary_in_each_user)
+        else:
+            data = dict(self.user_data, **to_vary_in_each_user)
 
         mocker.patch.object(self.controller.model, "get_user_info", return_value=data)
 

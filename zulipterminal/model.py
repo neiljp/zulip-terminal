@@ -50,6 +50,8 @@ from zulipterminal.helper import (
     Message,
     NamedEmojiData,
     StreamData,
+    TidiedBotUserInfo,
+    TidiedRegularUserInfo,
     TidiedUserInfo,
     asynch,
     canonicalize_color,
@@ -989,34 +991,47 @@ class Model:
         else:
             last_active = ""
 
-        # Ensure backwards compatibility with "bot_owner" (which is email of owner)
-        # "bot_owner_id" is only from ZFL 1 (Zulip 3.0)
-        raw_bot_owner_id = api_user_data.get("bot_owner_id", None)
-        raw_bot_owner = api_user_data.get("bot_owner", None)
-        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]]
-        if raw_bot_owner_id is not None:
-            bot_owner = self._all_users_by_id.get(raw_bot_owner_id, None)
-        elif raw_bot_owner is not None:
-            bot_owner = self.user_dict.get(raw_bot_owner, None)
-        else:
-            bot_owner = None
-
-        is_bot = api_user_data.get("is_bot", False)
-        bot_type = api_user_data.get("bot_type", None)
-        bot_owner_name = bot_owner["full_name"] if bot_owner is not None else ""
-
         # TODO: Add custom fields later as an enhancement
-        user_info: TidiedUserInfo = dict(
-            full_name=full_name,
-            email=email,
-            date_joined=date_joined,
-            timezone=timezone,
-            is_bot=is_bot,
-            role=user_role,
-            bot_type=bot_type,
-            bot_owner_name=bot_owner_name,
-            last_active=last_active,
-        )
+        user_info: TidiedUserInfo
+
+        raw_is_bot = api_user_data.get("is_bot", False)
+        if raw_is_bot is False:
+            user_info = TidiedRegularUserInfo(
+                full_name=full_name,
+                email=email,
+                date_joined=date_joined,
+                timezone=timezone,
+                role=user_role,
+                last_active=last_active,
+                is_bot=False,
+            )
+        else:
+            # Ensure backwards compatibility with "bot_owner" (which is email of owner)
+            # "bot_owner_id" is only from ZFL 1 (Zulip 3.0)
+            raw_bot_owner_id = api_user_data.get("bot_owner_id", None)
+            raw_bot_owner = api_user_data.get("bot_owner", None)
+            bot_owner: Optional[Union[RealmUser, Dict[str, Any]]]
+            if raw_bot_owner_id is not None:
+                bot_owner = self._all_users_by_id.get(raw_bot_owner_id, None)
+            elif raw_bot_owner is not None:
+                bot_owner = self.user_dict.get(raw_bot_owner, None)
+            else:
+                bot_owner = None
+
+            bot_type = api_user_data.get("bot_type", None)
+            bot_owner_name = bot_owner["full_name"] if bot_owner is not None else ""
+
+            user_info = TidiedBotUserInfo(
+                full_name=full_name,
+                email=email,
+                date_joined=date_joined,
+                timezone=timezone,
+                role=user_role,
+                last_active=last_active,
+                is_bot=True,
+                bot_type=bot_type,
+                bot_owner_name=bot_owner_name,
+            )
 
         return user_info
 
