@@ -21,7 +21,6 @@ from typing import (
     Iterable,
     Iterator,
     List,
-    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -81,7 +80,7 @@ class TidiedBotUserInfo(BaseTidiedUserInfo):
     is_bot: Literal[True]
 
     # Below fields are only meaningful if is_bot == True
-    bot_type: Optional[int]
+    bot_type: int
     bot_owner_name: str
 
 

@@ -1019,6 +1019,8 @@ class Model:
                 bot_owner = None
 
             bot_type = api_user_data.get("bot_type", None)
+            assert bot_type is not None, "API states only null/None for non-bot"
+
             bot_owner_name = bot_owner["full_name"] if bot_owner is not None else ""
 
             user_info = TidiedBotUserInfo(

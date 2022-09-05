@@ -1572,22 +1572,26 @@ class TestModel:
             case({"is_owner": True}, "role", 100, id="user_is_owner:Zulip_3.0+"),
             case({"is_admin": True}, "role", 200, id="user_is_admin:preZulip_4.0"),
             case({"is_guest": True}, "role", 600, id="user_is_guest:preZulip_4.0"),
-            case({"is_bot": True}, "is_bot", True, id="user_is_bot"),
+            case({"is_bot": True, "bot_type": 1}, "is_bot", True, id="user_is_bot"),
             case({"is_bot": True, "bot_type": 1}, "bot_type", 1, id="user_bot_type"),
-            case({"is_bot": True}, "bot_type", None, id="user_empty_bot_type"),
             case(
-                {"is_bot": True, "bot_owner_id": 12},
+                {"is_bot": True, "bot_type": 1, "bot_owner_id": 12},
                 "bot_owner_name",
                 "Human 2",
                 id="user_bot_has_owner:Zulip_3.0+_ZFL1",
             ),
             case(
-                {"is_bot": True, "bot_owner": "person2@example.com"},
+                {"is_bot": True, "bot_type": 1, "bot_owner": "person2@example.com"},
                 "bot_owner_name",
                 "Human 2",
                 id="user_bot_has_owner:preZulip_3.0",
             ),
-            case({"is_bot": True}, "bot_owner_name", "", id="user_bot_has_no_owner"),
+            case(
+                {"is_bot": True, "bot_type": 1},
+                "bot_owner_name",
+                "",
+                id="user_bot_has_no_owner",
+            ),
         ],
     )
     def test_get_user_info(
