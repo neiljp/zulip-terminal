@@ -150,7 +150,7 @@ def users_fixture(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 @pytest.fixture
-def tidied_user_info_response() -> TidiedUserInfo:
+def tidied_user_info_response_user() -> TidiedUserInfo:
     # FIXME: Refactor this to use a more generic user?
     return {
         "full_name": "Human 2",
@@ -159,7 +159,21 @@ def tidied_user_info_response() -> TidiedUserInfo:
         "timezone": "",
         "is_bot": False,
         "role": 400,
-        "bot_type": None,
+        "last_active": "",
+    }
+
+
+@pytest.fixture
+def tidied_user_info_response_bot() -> TidiedUserInfo:
+    # FIXME: Refactor this to use a more generic user?
+    return {
+        "full_name": "Human 2",
+        "email": "person2@example.com",
+        "date_joined": "",
+        "timezone": "",
+        "is_bot": True,
+        "role": 400,
+        "bot_type": 1,
         "bot_owner_name": "",
         "last_active": "",
     }

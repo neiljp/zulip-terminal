@@ -30,7 +30,7 @@ from typing import (
 from urllib.parse import unquote
 
 import requests
-from typing_extensions import ParamSpec, TypedDict
+from typing_extensions import Literal, ParamSpec, TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
 from zulipterminal.config.keys import primary_key_for_command
@@ -64,7 +64,7 @@ class EmojiData(TypedDict):
 NamedEmojiData = Dict[str, EmojiData]
 
 
-class TidiedUserInfo(TypedDict):
+class BaseTidiedUserInfo(TypedDict):
     full_name: str
     email: str
     date_joined: str
@@ -72,10 +72,20 @@ class TidiedUserInfo(TypedDict):
     role: int
     last_active: str
 
-    is_bot: bool
+
+class TidiedRegularUserInfo(BaseTidiedUserInfo):
+    is_bot: Literal[False]
+
+
+class TidiedBotUserInfo(BaseTidiedUserInfo):
+    is_bot: Literal[True]
+
     # Below fields are only meaningful if is_bot == True
     bot_type: Optional[int]
     bot_owner_name: str
+
+
+TidiedUserInfo = Union[TidiedRegularUserInfo, TidiedBotUserInfo]
 
 
 class Index(TypedDict):

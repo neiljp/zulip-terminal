@@ -50,6 +50,8 @@ from zulipterminal.helper import (
     Message,
     NamedEmojiData,
     StreamData,
+    TidiedBotUserInfo,
+    TidiedRegularUserInfo,
     TidiedUserInfo,
     asynch,
     canonicalize_color,
@@ -975,7 +977,10 @@ class Model:
         else:
             user_role = raw_user_role
 
+        full_name = api_user_data.get("full_name", "(No name)")
         email = api_user_data.get("email", "")
+        date_joined = api_user_data.get("date_joined", "")
+        timezone = api_user_data.get("timezone", "")
 
         presences_for_email = self.initial_data["presences"].get(email, None)
         if presences_for_email is not None:
@@ -987,27 +992,45 @@ class Model:
             last_active = ""
 
         # TODO: Add custom fields later as an enhancement
-        user_info: TidiedUserInfo = dict(
-            full_name=api_user_data.get("full_name", "(No name)"),
-            email=api_user_data.get("email", ""),
-            date_joined=api_user_data.get("date_joined", ""),
-            timezone=api_user_data.get("timezone", ""),
-            is_bot=api_user_data.get("is_bot", False),
-            role=user_role,
-            bot_type=api_user_data.get("bot_type", None),
-            bot_owner_name="",  # Can be non-empty only if is_bot == True
-            last_active=last_active,
-        )
+        user_info: TidiedUserInfo
 
-        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
+        raw_is_bot = api_user_data.get("is_bot", False)
+        if raw_is_bot is False:
+            user_info = TidiedRegularUserInfo(
+                full_name=full_name,
+                email=email,
+                date_joined=date_joined,
+                timezone=timezone,
+                role=user_role,
+                last_active=last_active,
+                is_bot=False,
+            )
+        else:
+            # Ensure backwards compatibility for `bot_owner` (which is email of owner)
+            raw_bot_owner_id = api_user_data.get("bot_owner_id", None)
+            raw_bot_owner = api_user_data.get("bot_owner", None)
+            bot_owner: Optional[Union[RealmUser, Dict[str, Any]]]
+            if raw_bot_owner_id is not None:
+                bot_owner = self._all_users_by_id.get(raw_bot_owner_id, None)
+            elif raw_bot_owner is not None:
+                bot_owner = self.user_dict.get(raw_bot_owner, None)
+            else:
+                bot_owner = None
 
-        if api_user_data.get("bot_owner_id", None):
-            bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
-        # Ensure backwards compatibility for `bot_owner` (which is email of owner)
-        elif api_user_data.get("bot_owner", None):
-            bot_owner = self.user_dict.get(api_user_data["bot_owner"], None)
+            bot_owner_name = bot_owner["full_name"] if bot_owner is not None else ""
+            bot_type = api_user_data.get("bot_type", None)
 
-        user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
+            user_info = TidiedBotUserInfo(
+                full_name=full_name,
+                email=email,
+                date_joined=date_joined,
+                timezone=timezone,
+                role=user_role,
+                last_active=last_active,
+                is_bot=True,
+                bot_type=bot_type,
+                bot_owner_name=bot_owner_name,
+            )
 
         return user_info
 
