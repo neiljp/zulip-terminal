@@ -170,12 +170,10 @@ def tidied_user_info_response_bot() -> TidiedUserInfo:
         "full_name": "Human 2",
         "email": "person2@example.com",
         "date_joined": "",
-        "timezone": "",
         "is_bot": True,
         "role": 400,
         "bot_type": 1,
         "bot_owner_name": "",
-        "last_active": "",
     }
 
 

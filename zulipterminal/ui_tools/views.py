@@ -1157,19 +1157,6 @@ class UserInfoView(PopUpView):
             display_data["Email"] = data["email"]
         if data["date_joined"]:
             display_data["Date joined"] = data["date_joined"][:10]
-        if data["timezone"]:
-            display_data["Timezone"] = data["timezone"].replace("_", " ")
-
-            # Converting all timestamps to UTC
-            utc_time = datetime.now()
-            tz = pytz.timezone(data["timezone"])
-            time = utc_time.astimezone(tz).replace(tzinfo=None).timestamp()
-
-            # Take 24h vs AM/PM format into consideration
-            local_time = controller.model.formatted_local_time(
-                round(time), show_seconds=False
-            )
-            display_data["Local time"] = local_time[11:]
 
         if data["is_bot"]:
             assert data["bot_type"] is not None
@@ -1180,6 +1167,20 @@ class UserInfoView(PopUpView):
                 display_data["Owner"] = data["bot_owner_name"]
         else:
             display_data["Role"] = ROLE_BY_ID[data["role"]]["name"]
+
+            if data["timezone"]:
+                display_data["Timezone"] = data["timezone"].replace("_", " ")
+
+                # Converting all timestamps to UTC
+                utc_time = datetime.now()
+                tz = pytz.timezone(data["timezone"])
+                time = utc_time.astimezone(tz).replace(tzinfo=None).timestamp()
+
+                # Take 24h vs AM/PM format into consideration
+                local_time = controller.model.formatted_local_time(
+                    round(time), show_seconds=False
+                )
+                display_data["Local time"] = local_time[11:]
 
             if data["last_active"]:
                 display_data["Last active"] = data["last_active"]
