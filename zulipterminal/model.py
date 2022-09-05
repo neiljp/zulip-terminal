@@ -975,17 +975,28 @@ class Model:
         else:
             user_role = raw_user_role
 
+        email = api_user_data.get("email", "")
+
+        presences_for_email = self.initial_data["presences"].get(email, None)
+        if presences_for_email is not None:
+            timestamp = presences_for_email["aggregated"]["timestamp"]
+
+            # Take 24h vs AM/PM format into consideration
+            last_active = self.formatted_local_time(timestamp, show_seconds=True)
+        else:
+            last_active = ""
+
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo = dict(
             full_name=api_user_data.get("full_name", "(No name)"),
-            email=api_user_data.get("email", ""),
+            email=email,
             date_joined=api_user_data.get("date_joined", ""),
             timezone=api_user_data.get("timezone", ""),
             is_bot=api_user_data.get("is_bot", False),
             role=user_role,
             bot_type=api_user_data.get("bot_type", None),
             bot_owner_name="",  # Can be non-empty only if is_bot == True
-            last_active="",
+            last_active=last_active,
         )
 
         bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
@@ -997,16 +1008,6 @@ class Model:
             bot_owner = self.user_dict.get(api_user_data["bot_owner"], None)
 
         user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
-
-        if self.initial_data["presences"].get(user_info["email"], None):
-            timestamp = self.initial_data["presences"][user_info["email"]][
-                "aggregated"
-            ]["timestamp"]
-
-            # Take 24h vs AM/PM format into consideration
-            user_info["last_active"] = self.formatted_local_time(
-                timestamp, show_seconds=True
-            )
 
         return user_info
 
