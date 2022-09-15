@@ -284,9 +284,17 @@ class TestUserInfoView:
         [
             ({}, "Email", "person2@example.com"),
             ({"email": ""}, "Email", None),
-            ({"date_joined": "2021-03-18 16:52:48"}, "Date joined", "2021-03-18"),
+            (
+                {"date_joined": "2021-03-18 16:52:48"},
+                "Date joined",
+                "2021-03-18",
+            ),
             ({}, "Date joined", None),
-            ({"timezone": "America/Los_Angeles"}, "Timezone", "America/Los Angeles"),
+            (
+                {"timezone": "America/Los_Angeles"},
+                "Timezone",
+                "America/Los Angeles",
+            ),
             ({}, "Timezone", None),
             (
                 {"is_bot": True, "bot_type": 1, "bot_owner_name": "Test Owner"},
@@ -300,10 +308,26 @@ class TestUserInfoView:
                 "Tue Mar 13 10:55:22",
             ),
             ({}, "Last active", None),
-            ({"is_bot": True, "bot_type": 1}, "Role", "Generic Bot"),
-            ({"is_bot": True, "bot_type": 2}, "Role", "Incoming Webhook Bot"),
-            ({"is_bot": True, "bot_type": 3}, "Role", "Outgoing Webhook Bot"),
-            ({"is_bot": True, "bot_type": 4}, "Role", "Embedded Bot"),
+            (
+                {"is_bot": True, "bot_type": 1},
+                "Role",
+                "Generic Bot",
+            ),
+            (
+                {"is_bot": True, "bot_type": 2},
+                "Role",
+                "Incoming Webhook Bot",
+            ),
+            (
+                {"is_bot": True, "bot_type": 3},
+                "Role",
+                "Outgoing Webhook Bot",
+            ),
+            (
+                {"is_bot": True, "bot_type": 4},
+                "Role",
+                "Embedded Bot",
+            ),
             ({"role": 100}, "Role", "Owner"),
             ({"role": 200}, "Role", "Administrator"),
             ({"role": 300}, "Role", "Moderator"),
