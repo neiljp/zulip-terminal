@@ -975,7 +975,10 @@ class Model:
         else:
             user_role = raw_user_role
 
+        full_name = api_user_data.get("full_name", "(No name)")
         email = api_user_data.get("email", "")
+        date_joined = api_user_data.get("date_joined", "")
+        timezone = api_user_data.get("timezone", "")
 
         presences_for_email = self.initial_data["presences"].get(email, None)
         if presences_for_email is not None:
@@ -1004,10 +1007,10 @@ class Model:
 
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo = dict(
-            full_name=api_user_data.get("full_name", "(No name)"),
+            full_name=full_name,
             email=email,
-            date_joined=api_user_data.get("date_joined", ""),
-            timezone=api_user_data.get("timezone", ""),
+            date_joined=date_joined,
+            timezone=timezone,
             is_bot=is_bot,
             role=user_role,
             bot_type=bot_type,
