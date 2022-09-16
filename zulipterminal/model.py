@@ -986,28 +986,34 @@ class Model:
         else:
             last_active = ""
 
+        # Ensure backwards compatibility with "bot_owner" (which is email of owner)
+        # "bot_owner_id" is only from ZFL 1 (Zulip 3.0)
+        raw_bot_owner_id = api_user_data.get("bot_owner_id", None)
+        raw_bot_owner = api_user_data.get("bot_owner", None)
+        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]]
+        if raw_bot_owner_id is not None:
+            bot_owner = self._all_users_by_id.get(raw_bot_owner_id, None)
+        elif raw_bot_owner is not None:
+            bot_owner = self.user_dict.get(raw_bot_owner, None)
+        else:
+            bot_owner = None
+
+        is_bot = api_user_data.get("is_bot", False)
+        bot_type = api_user_data.get("bot_type", None)
+        bot_owner_name = bot_owner["full_name"] if bot_owner is not None else ""
+
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo = dict(
             full_name=api_user_data.get("full_name", "(No name)"),
             email=email,
             date_joined=api_user_data.get("date_joined", ""),
             timezone=api_user_data.get("timezone", ""),
-            is_bot=api_user_data.get("is_bot", False),
+            is_bot=is_bot,
             role=user_role,
-            bot_type=api_user_data.get("bot_type", None),
-            bot_owner_name="",  # Can be non-empty only if is_bot == True
+            bot_type=bot_type,
+            bot_owner_name=bot_owner_name,
             last_active=last_active,
         )
-
-        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
-
-        if api_user_data.get("bot_owner_id", None):
-            bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
-        # Ensure backwards compatibility for `bot_owner` (which is email of owner)
-        elif api_user_data.get("bot_owner", None):
-            bot_owner = self.user_dict.get(api_user_data["bot_owner"], None)
-
-        user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
 
         return user_info
 
