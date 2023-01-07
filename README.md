@@ -208,6 +208,12 @@ No additional package is required to enable copying to clipboard.
 
 Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
 
+> The Zulip Terminal project has taken part in [Google Summer of Code
+> (GSoC)](https://summerofcode.withgoogle.com) since Summer 2019, under the
+> umbrella of the Zulip project. For more information see the Zulip
+> documentation regarding participation in [Outreach
+> programs](https://zulip.readthedocs.io/en/latest/outreach/).
+
 To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
