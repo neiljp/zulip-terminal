@@ -206,7 +206,17 @@ No additional package is required to enable copying to clipboard.
 
 ## Contributor Guidelines
 
-Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
+Zulip Terminal is being built by members of the [Zulip
+Community](https://zulip.com/team), and we invite you to join us and chat in
+the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
+stream on the community server, [chat.zulip.org](https://chat.zulip.org).
+
+Please see the following sections for:
+- [Getting the code](#getting-zulip-terminal-code-and-connecting-it-to-upstream)
+- [Setting up a development environment](#setting-up-a-development-environment)
+- [Development tasks](#development-tasks)
+- [Tips for working with tests (pytest)](#tips-for-working-with-tests-pytest)
+- [Debugging tips](#debugging-tips)
 
 > The Zulip Terminal project has taken part in [Google Summer of Code
 > (GSoC)](https://summerofcode.withgoogle.com) since Summer 2019, under the
