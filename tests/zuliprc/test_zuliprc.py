@@ -74,7 +74,18 @@ def test_validate_structure__parse_error(
     assert zuliprc_file.validate_structure() == "Could not parse file"
 
 
-def test_validate_structure__no_api_section(zuliprc_factory: ZuliprcFactoryT) -> None:
-    zuliprc_path = zuliprc_factory(api=None, config=None)
+@pytest.mark.parametrize(
+    "api, expected_error",
+    [
+        (None, "No [api] section in file"),
+        ({"email": "", "key": ""}, "No 'site' key in [api] section"),
+        ({"email": "", "site": ""}, "No 'key' key in [api] section"),
+        ({"key": "", "site": ""}, "No 'email' key in [api] section"),
+    ],
+)
+def test_validate_structure__api_section_invalid(
+    zuliprc_factory: ZuliprcFactoryT, api: Optional[Dict[str, str]], expected_error: str
+) -> None:
+    zuliprc_path = zuliprc_factory(api=api, config=None)
     zuliprc_file = ZuliprcFile(zuliprc_path)
-    assert zuliprc_file.validate_structure() == "No [api] section in file"
+    assert zuliprc_file.validate_structure() == expected_error

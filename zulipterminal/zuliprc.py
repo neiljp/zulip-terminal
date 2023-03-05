@@ -33,4 +33,11 @@ class ZuliprcFile:
             return f"Failed to load '{self._zuliprc_path}'"
         if not config.has_section("api"):
             return "No [api] section in file"
+        api_section = config["api"]
+        if "site" not in api_section:
+            return "No 'site' key in [api] section"
+        if "key" not in api_section:
+            return "No 'key' key in [api] section"
+        if "email" not in api_section:
+            return "No 'email' key in [api] section"
         return ""

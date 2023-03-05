@@ -106,7 +106,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
 
 @pytest.fixture
 def minimal_valid_zuliprc(zuliprc_factory: ZuliprcFactoryT) -> Path:
-    return zuliprc_factory(api={}, config=None)
+    return zuliprc_factory(api=dict(site="", key="", email=""), config=None)
 
 
 def test_valid_zuliprc_but_no_connection(
@@ -346,8 +346,10 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 def parameterized_zuliprc_factory(
     zuliprc_factory: ZuliprcFactoryT,
 ) -> Callable[[Dict[str, str]], Path]:
-    # Add minimal [api] section to avoid Exception
-    return lambda config: zuliprc_factory(api={}, config=config)
+    # Use minimal [api] section to pass validation
+    return lambda config: zuliprc_factory(
+        api=dict(site="", key="", email=""), config=config
+    )
 
 
 @pytest.mark.parametrize(
