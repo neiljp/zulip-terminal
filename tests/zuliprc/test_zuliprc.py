@@ -1,5 +1,5 @@
 import stat
-from typing import Dict, Optional
+from typing import Dict, Optional, Set
 
 import pytest
 
@@ -41,7 +41,7 @@ def test_validate_structure__no_errors(zuliprc_factory: ZuliprcFactoryT) -> None
         api={"email": "", "key": "", "site": ""}, config=None
     )
     zuliprc_file = ZuliprcFile(zuliprc_path)
-    assert zuliprc_file.validate_structure() == ""
+    assert zuliprc_file.validate_structure() == []
 
 
 def test_validate_structure__file_missing(zuliprc_factory: ZuliprcFactoryT) -> None:
@@ -50,7 +50,7 @@ def test_validate_structure__file_missing(zuliprc_factory: ZuliprcFactoryT) -> N
     )
     bad_path = zuliprc_path.parent / "zuliprc2"
     zuliprc_file = ZuliprcFile(bad_path)
-    assert zuliprc_file.validate_structure() == f"Failed to load '{bad_path}'"
+    assert zuliprc_file.validate_structure() == [f"Failed to load '{bad_path}'"]
 
 
 @pytest.mark.parametrize("with_api_section_present", [True, False])
@@ -60,10 +60,9 @@ def test_validate_structure__keys_not_in_section(
     api_section: Optional[Dict[str, str]] = {} if with_api_section_present else None
     zuliprc_path = zuliprc_factory(api=api_section, config=None, leading={"key": "x"})
     zuliprc_file = ZuliprcFile(zuliprc_path)
-    assert (
-        zuliprc_file.validate_structure()
-        == "No section header found in file (eg. [api])"
-    )
+    assert zuliprc_file.validate_structure() == [
+        "No section header found in file (eg. [api])"
+    ]
 
 
 def test_validate_structure__parse_error(
@@ -71,21 +70,43 @@ def test_validate_structure__parse_error(
 ) -> None:
     zuliprc_path = zuliprc_factory(api={"": ""}, config=None)
     zuliprc_file = ZuliprcFile(zuliprc_path)
-    assert zuliprc_file.validate_structure() == "Could not parse file"
+    assert zuliprc_file.validate_structure() == ["Could not parse file"]
 
 
 @pytest.mark.parametrize(
-    "api, expected_error",
+    "api, expected_errors",
     [
-        (None, "No [api] section in file"),
-        ({"email": "", "key": ""}, "No 'site' key in [api] section"),
-        ({"email": "", "site": ""}, "No 'key' key in [api] section"),
-        ({"key": "", "site": ""}, "No 'email' key in [api] section"),
+        (None, {"No [api] section in file"}),
+        ({"email": "", "key": ""}, {"No 'site' key in [api] section"}),
+        ({"email": "", "site": ""}, {"No 'key' key in [api] section"}),
+        ({"key": "", "site": ""}, {"No 'email' key in [api] section"}),
+        (
+            {"key": ""},
+            {"No 'email' key in [api] section", "No 'site' key in [api] section"},
+        ),
+        (
+            {"email": ""},
+            {"No 'key' key in [api] section", "No 'site' key in [api] section"},
+        ),
+        (
+            {"site": ""},
+            {"No 'key' key in [api] section", "No 'email' key in [api] section"},
+        ),
+        (
+            {},
+            {
+                "No 'key' key in [api] section",
+                "No 'email' key in [api] section",
+                "No 'site' key in [api] section",
+            },
+        ),
     ],
 )
 def test_validate_structure__api_section_invalid(
-    zuliprc_factory: ZuliprcFactoryT, api: Optional[Dict[str, str]], expected_error: str
+    zuliprc_factory: ZuliprcFactoryT,
+    api: Optional[Dict[str, str]],
+    expected_errors: Set[str],
 ) -> None:
     zuliprc_path = zuliprc_factory(api=api, config=None)
     zuliprc_file = ZuliprcFile(zuliprc_path)
-    assert zuliprc_file.validate_structure() == expected_error
+    assert set(zuliprc_file.validate_structure()) == expected_errors

@@ -4,7 +4,7 @@ Defines ZuliprcFile class to work with zuliprc files (holding login details & se
 import configparser
 import stat
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 
 class ZuliprcFile:
@@ -20,21 +20,22 @@ class ZuliprcFile:
             return stat.filemode(mode)
         return None
 
-    def validate_structure(self) -> str:
-        """Returns any errors detected in file, or empty string"""
+    def validate_structure(self) -> List[str]:
+        """Returns list of any errors detected in file as strings"""
         config = configparser.ConfigParser()
         try:
             files_read = config.read([self._zuliprc_path])
         except configparser.MissingSectionHeaderError:
-            return "No section header found in file (eg. [api])"
+            return ["No section header found in file (eg. [api])"]
         except configparser.ParsingError:
-            return "Could not parse file"
+            return ["Could not parse file"]
         if len(files_read) == 0:
-            return f"Failed to load '{self._zuliprc_path}'"
+            return [f"Failed to load '{self._zuliprc_path}'"]
         if not config.has_section("api"):
-            return "No [api] section in file"
+            return ["No [api] section in file"]
         api_section = config["api"]
+        errors = []
         for key in ["site", "key", "email"]:
             if key not in api_section:
-                return f"No '{key}' key in [api] section"
-        return ""
+                errors.append(f"No '{key}' key in [api] section")
+        return errors
