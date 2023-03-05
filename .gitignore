@@ -22,3 +22,7 @@ zuliprc
 .vscode/*
 # PyCharm
 .idea
+
+## Don't skip files in source dirs that happen to match
+!zulipterminal/*
+!tests/*
