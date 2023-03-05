@@ -31,3 +31,11 @@ def test_security_issues_present__return_current_permissions_str(
 
     expected_text = stat.filemode(zuliprc_path.stat().st_mode)
     assert zuliprc_file.security_issues_present() == expected_text
+
+
+def test_validate_structure__no_errors(zuliprc_factory: ZuliprcFactoryT) -> None:
+    zuliprc_path = zuliprc_factory(
+        api={"email": "", "key": "", "site": ""}, config=None
+    )
+    zuliprc_file = ZuliprcFile(zuliprc_path)
+    assert zuliprc_file.validate_structure() == ""

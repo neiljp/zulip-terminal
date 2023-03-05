@@ -18,3 +18,7 @@ class ZuliprcFile:
         if is_readable_by_group_or_others:
             return stat.filemode(mode)
         return None
+
+    def validate_structure(self) -> str:
+        """Returns any errors detected in file, or empty string"""
+        return ""
