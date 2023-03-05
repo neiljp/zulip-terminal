@@ -31,4 +31,6 @@ class ZuliprcFile:
             return "Could not parse file"
         if len(files_read) == 0:
             return f"Failed to load '{self._zuliprc_path}'"
+        if not config.has_section("api"):
+            return "No [api] section in file"
         return ""

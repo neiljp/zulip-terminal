@@ -72,3 +72,9 @@ def test_validate_structure__parse_error(
     zuliprc_path = zuliprc_factory(api={"": ""}, config=None)
     zuliprc_file = ZuliprcFile(zuliprc_path)
     assert zuliprc_file.validate_structure() == "Could not parse file"
+
+
+def test_validate_structure__no_api_section(zuliprc_factory: ZuliprcFactoryT) -> None:
+    zuliprc_path = zuliprc_factory(api=None, config=None)
+    zuliprc_file = ZuliprcFile(zuliprc_path)
+    assert zuliprc_file.validate_structure() == "No [api] section in file"
