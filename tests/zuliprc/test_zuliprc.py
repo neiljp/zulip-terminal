@@ -39,3 +39,12 @@ def test_validate_structure__no_errors(zuliprc_factory: ZuliprcFactoryT) -> None
     )
     zuliprc_file = ZuliprcFile(zuliprc_path)
     assert zuliprc_file.validate_structure() == ""
+
+
+def test_validate_structure__file_missing(zuliprc_factory: ZuliprcFactoryT) -> None:
+    zuliprc_path = zuliprc_factory(
+        api={"email": "", "key": "", "site": ""}, config=None
+    )
+    bad_path = zuliprc_path.parent / "zuliprc2"
+    zuliprc_file = ZuliprcFile(bad_path)
+    assert zuliprc_file.validate_structure() == f"Failed to load '{bad_path}'"

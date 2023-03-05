@@ -1,6 +1,7 @@
 """
 Defines ZuliprcFile class to work with zuliprc files (holding login details & settings)
 """
+import configparser
 import stat
 from pathlib import Path
 from typing import Optional, Union
@@ -21,4 +22,8 @@ class ZuliprcFile:
 
     def validate_structure(self) -> str:
         """Returns any errors detected in file, or empty string"""
+        config = configparser.ConfigParser()
+        files_read = config.read([self._zuliprc_path])
+        if len(files_read) == 0:
+            return f"Failed to load '{self._zuliprc_path}'"
         return ""
