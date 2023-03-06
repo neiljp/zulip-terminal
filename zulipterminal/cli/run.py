@@ -330,14 +330,15 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
         )
         sys.exit(1)
 
-    zuliprc = configparser.ConfigParser()
-
-    try:
-        res = zuliprc.read(zuliprc_path)
-        if len(res) == 0:
-            exit_with_error(f"Could not access zuliprc file at {zuliprc_path}")
-    except configparser.MissingSectionHeaderError:
+    structural_issues = zuliprc_file.validate_structure()
+    if structural_issues:
+        print("Errors found in structure of zuliprc file:")
+        for issue in structural_issues:
+            print(f"   {issue}")
         exit_with_error(f"Failed to parse zuliprc file at {zuliprc_path}")
+
+    zuliprc = configparser.ConfigParser()
+    zuliprc.read(zuliprc_path)
 
     # Initialize with default settings
     settings = {
