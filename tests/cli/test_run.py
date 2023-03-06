@@ -8,6 +8,7 @@ import pytest
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
+from tests.types import ZuliprcFactoryT
 from zulipterminal.cli.run import (
     _write_zuliprc,
     exit_with_error,
@@ -104,18 +105,14 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
 
 
 @pytest.fixture
-def minimal_zuliprc(tmp_path: Path) -> str:
-    zuliprc_path = tmp_path / "zuliprc"
-    with open(zuliprc_path, "w") as f:
-        f.write("[api]")  # minimal to avoid Exception
-    os.chmod(zuliprc_path, 0o600)
-    return str(zuliprc_path)
+def minimal_valid_zuliprc(zuliprc_factory: ZuliprcFactoryT) -> Path:
+    return zuliprc_factory(api={}, config=None)
 
 
 def test_valid_zuliprc_but_no_connection(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    minimal_zuliprc: str,
+    minimal_valid_zuliprc: Path,
     server_connection_error: str = "some_error",
     platform: str = "some_platform",
 ) -> None:
@@ -126,7 +123,7 @@ def test_valid_zuliprc_but_no_connection(
     mocker.patch(MODULE + ".detected_platform", return_value=platform)
 
     with pytest.raises(SystemExit) as e:
-        main(["-c", minimal_zuliprc])
+        main(["-c", str(minimal_valid_zuliprc)])
 
     assert str(e.value) == "1"
 
@@ -159,7 +156,7 @@ def test_valid_zuliprc_but_no_connection(
 def test_warning_regarding_incomplete_theme(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    minimal_zuliprc: str,
+    minimal_valid_zuliprc: Path,
     bad_theme: str,
     expected_complete_incomplete_themes: Tuple[List[str], List[str]],
     expected_warning: str,
@@ -179,7 +176,7 @@ def test_warning_regarding_incomplete_theme(
     mocker.patch(MODULE + ".generate_theme")
 
     with pytest.raises(SystemExit) as e:
-        main(["-c", minimal_zuliprc, "-t", bad_theme])
+        main(["-c", str(minimal_valid_zuliprc), "-t", bad_theme])
 
     assert str(e.value) == "1"
 
@@ -346,18 +343,11 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
 
 @pytest.fixture
-def parameterized_zuliprc(tmp_path: Path) -> Callable[[Dict[str, str]], str]:
-    def func(config: Dict[str, str]) -> str:
-        zuliprc_path = tmp_path / "zuliprc"
-        with open(zuliprc_path, "w") as f:
-            f.write("[api]\n\n")  # minimal to avoid Exception
-            f.write("[zterm]\n")
-            for key, value in config.items():
-                f.write(f"{key}={value}\n")
-        os.chmod(zuliprc_path, 0o600)
-        return str(zuliprc_path)
-
-    return func
+def parameterized_zuliprc_factory(
+    zuliprc_factory: ZuliprcFactoryT,
+) -> Callable[[Dict[str, str]], Path]:
+    # Add minimal [api] section to avoid Exception
+    return lambda config: zuliprc_factory(api={}, config=config)
 
 
 @pytest.mark.parametrize(
@@ -378,7 +368,7 @@ def parameterized_zuliprc(tmp_path: Path) -> Callable[[Dict[str, str]], str]:
 def test_successful_main_function_with_config(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    parameterized_zuliprc_factory: Callable[[Dict[str, str]], Path],
     config_key: str,
     config_value: str,
     footlinks_output: str,
@@ -393,12 +383,12 @@ def test_successful_main_function_with_config(
         "color-depth": "256",
     }
     config[config_key] = config_value
-    zuliprc = parameterized_zuliprc(config)
+    zuliprc_path = str(parameterized_zuliprc_factory(config))
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
     mocker.patch(CONTROLLER + ".main", return_value=None)
 
     with pytest.raises(SystemExit):
-        main(["-c", zuliprc])
+        main(["-c", zuliprc_path])
 
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
@@ -432,18 +422,18 @@ def test_successful_main_function_with_config(
 def test_main_error_with_invalid_zuliprc_options(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    parameterized_zuliprc_factory: Callable[[Dict[str, str]], Path],
     zulip_config: Dict[str, str],
     error_message: str,
     platform: str = "some_platform",
 ) -> None:
-    zuliprc = parameterized_zuliprc(zulip_config)
+    zuliprc_path = str(parameterized_zuliprc_factory(zulip_config))
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
     mocker.patch(MODULE + ".detected_platform", return_value=platform)
     mocker.patch(CONTROLLER + ".main", return_value=None)
 
     with pytest.raises(SystemExit) as e:
-        main(["-c", zuliprc])
+        main(["-c", zuliprc_path])
 
     assert str(e.value) == "1"
 
@@ -502,17 +492,16 @@ def test__write_zuliprc__success(
 
 
 def test__write_zuliprc__fail_file_exists(
-    minimal_zuliprc: str,
-    tmp_path: Path,
+    zuliprc_factory: ZuliprcFactoryT,
     id: str = "id",
     key: str = "key",
     url: str = "url",
 ) -> None:
-    path = os.path.join(str(tmp_path), "zuliprc")
-
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
-
-    assert error_message == "zuliprc already exists at " + path
+    zuliprc_path = zuliprc_factory(api=dict(key=key, site=url, email=id), config=None)
+    error_message = _write_zuliprc(
+        str(zuliprc_path), api_key=key, server_url=url, login_id=id
+    )
+    assert error_message == f"zuliprc already exists at {zuliprc_path}"
 
 
 @pytest.mark.parametrize(
@@ -531,14 +520,13 @@ def test__write_zuliprc__fail_file_exists(
     ],
 )
 def test_show_error_if_loading_zuliprc_with_open_permissions(
-    capsys: CaptureFixture[str], minimal_zuliprc: str, mode: int
+    capsys: CaptureFixture[str], zuliprc_factory: ZuliprcFactoryT, mode: int
 ) -> None:
-    mode += 0o600
-    os.chmod(minimal_zuliprc, mode)
-    current_mode = stat.filemode(os.stat(minimal_zuliprc).st_mode)
+    zuliprc_path = zuliprc_factory(api={}, config=None, mode=0o600 + mode)
+    current_mode = stat.filemode(os.stat(zuliprc_path).st_mode)
 
     with pytest.raises(SystemExit) as e:
-        main(["-c", minimal_zuliprc])
+        main(["-c", str(zuliprc_path)])
 
     assert str(e.value) == "1"
 
@@ -548,7 +536,7 @@ def test_show_error_if_loading_zuliprc_with_open_permissions(
     expected_last_lines = [
         f"(it currently has permissions '{current_mode}')",
         "This can often be achieved with a command such as:",
-        f"  chmod og-rwx {minimal_zuliprc}",
+        f"  chmod og-rwx {zuliprc_path}",
         "Consider regenerating the [api] part of your zuliprc to ensure "
         "your account is secure."
         "\x1b[0m",
