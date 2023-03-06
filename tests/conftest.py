@@ -1,11 +1,13 @@
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 from pytest_mock import MockerFixture
 from urwid import Widget
 
+from tests.types import ZuliprcFactoryT
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
@@ -40,6 +42,33 @@ def no_asynch(mocker: MockerFixture) -> None:
     Make all function calls synchronous.
     """
     mocker.patch("zulipterminal.helper.asynch")
+
+
+# --------------- Zuliprc Fixtures -----------------------------------------
+
+
+@pytest.fixture
+def zuliprc_factory(tmp_path: Path) -> ZuliprcFactoryT:
+    def func(
+        *,
+        api: Optional[Dict[str, str]],
+        config: Optional[Dict[str, str]],
+        mode: int = 0o600,
+    ) -> Path:
+        zuliprc_path = tmp_path / "zuliprc"
+        with open(zuliprc_path, "w") as f:
+            if api is not None:
+                f.write("[api]\n\n")  # minimal to avoid Exception
+                for key, value in api.items():
+                    f.write(f"{key}={value}\n")
+            if config is not None:
+                f.write("[zterm]\n")
+                for key, value in config.items():
+                    f.write(f"{key}={value}\n")
+        zuliprc_path.chmod(mode)
+        return zuliprc_path
+
+    return func
 
 
 # --------------- Controller Fixtures -----------------------------------------
