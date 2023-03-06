@@ -6,7 +6,6 @@ import argparse
 import configparser
 import logging
 import os
-import stat
 import sys
 import traceback
 from enum import Enum
@@ -27,6 +26,7 @@ from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform
 from zulipterminal.version import ZT_VERSION
+from zulipterminal.zuliprc import ZuliprcFile
 
 
 class ConfigSource(Enum):
@@ -312,10 +312,10 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
 
-    mode = os.stat(zuliprc_path).st_mode
-    is_readable_by_group_or_others = mode & (stat.S_IRWXG | stat.S_IRWXO)
+    zuliprc_file = ZuliprcFile(zuliprc_path)
 
-    if is_readable_by_group_or_others:
+    security_issue = zuliprc_file.security_issues_present()
+    if security_issue:
         print(
             in_color(
                 "red",
@@ -325,7 +325,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
                 "This can often be achieved with a command such as:\n"
                 "  chmod og-rwx {0}\n"
                 "Consider regenerating the [api] part of your zuliprc to ensure "
-                "your account is secure.".format(zuliprc_path, stat.filemode(mode)),
+                "your account is secure.".format(zuliprc_path, security_issue),
             )
         )
         sys.exit(1)
