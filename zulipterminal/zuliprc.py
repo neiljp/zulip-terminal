@@ -27,6 +27,8 @@ class ZuliprcFile:
             files_read = config.read([self._zuliprc_path])
         except configparser.MissingSectionHeaderError:
             return "No section header found in file (eg. [api])"
+        except configparser.ParsingError:
+            return "Could not parse file"
         if len(files_read) == 0:
             return f"Failed to load '{self._zuliprc_path}'"
         return ""

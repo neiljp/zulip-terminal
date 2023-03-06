@@ -64,3 +64,11 @@ def test_validate_structure__keys_not_in_section(
         zuliprc_file.validate_structure()
         == "No section header found in file (eg. [api])"
     )
+
+
+def test_validate_structure__parse_error(
+    zuliprc_factory: ZuliprcFactoryT,
+) -> None:
+    zuliprc_path = zuliprc_factory(api={"": ""}, config=None)
+    zuliprc_file = ZuliprcFile(zuliprc_path)
+    assert zuliprc_file.validate_structure() == "Could not parse file"
