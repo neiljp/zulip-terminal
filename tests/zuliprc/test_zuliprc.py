@@ -1,4 +1,7 @@
 import stat
+from typing import Dict, Optional
+
+import pytest
 
 from tests.types import ZuliprcFactoryT
 from zulipterminal.zuliprc import ZuliprcFile
@@ -48,3 +51,16 @@ def test_validate_structure__file_missing(zuliprc_factory: ZuliprcFactoryT) -> N
     bad_path = zuliprc_path.parent / "zuliprc2"
     zuliprc_file = ZuliprcFile(bad_path)
     assert zuliprc_file.validate_structure() == f"Failed to load '{bad_path}'"
+
+
+@pytest.mark.parametrize("with_api_section_present", [True, False])
+def test_validate_structure__keys_not_in_section(
+    zuliprc_factory: ZuliprcFactoryT, with_api_section_present: bool
+) -> None:
+    api_section: Optional[Dict[str, str]] = {} if with_api_section_present else None
+    zuliprc_path = zuliprc_factory(api=api_section, config=None, leading={"key": "x"})
+    zuliprc_file = ZuliprcFile(zuliprc_path)
+    assert (
+        zuliprc_file.validate_structure()
+        == "No section header found in file (eg. [api])"
+    )

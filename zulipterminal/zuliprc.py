@@ -23,7 +23,10 @@ class ZuliprcFile:
     def validate_structure(self) -> str:
         """Returns any errors detected in file, or empty string"""
         config = configparser.ConfigParser()
-        files_read = config.read([self._zuliprc_path])
+        try:
+            files_read = config.read([self._zuliprc_path])
+        except configparser.MissingSectionHeaderError:
+            return "No section header found in file (eg. [api])"
         if len(files_read) == 0:
             return f"Failed to load '{self._zuliprc_path}'"
         return ""
