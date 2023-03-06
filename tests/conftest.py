@@ -53,10 +53,14 @@ def zuliprc_factory(tmp_path: Path) -> ZuliprcFactoryT:
         *,
         api: Optional[Dict[str, str]],
         config: Optional[Dict[str, str]],
+        leading: Optional[Dict[str, str]] = None,
         mode: int = 0o600,
     ) -> Path:
         zuliprc_path = tmp_path / "zuliprc"
         with open(zuliprc_path, "w") as f:
+            if leading is not None:
+                for key, value in leading.items():
+                    f.write(f"{key}={value}\n")
             if api is not None:
                 f.write("[api]\n\n")  # minimal to avoid Exception
                 for key, value in api.items():

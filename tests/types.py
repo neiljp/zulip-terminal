@@ -8,6 +8,7 @@ class ZuliprcFactoryT(Protocol):
         *,
         api: Optional[Dict[str, str]],
         config: Optional[Dict[str, str]],
+        leading: Optional[Dict[str, str]] = None,
         mode: int = 0o600,
     ) -> Path:
         ...
