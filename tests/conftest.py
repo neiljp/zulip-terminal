@@ -71,6 +71,24 @@ def zuliprc_factory(tmp_path: Path) -> ZuliprcFactoryT:
     return func
 
 
+@pytest.fixture(
+    params=[
+        # Avoid reformatting to retain readability of grid of values
+        # fmt:off
+        0o77, 0o70, 0o07,
+        0o66, 0o60, 0o06,
+        0o55, 0o50, 0o05,
+        0o44, 0o40, 0o04,
+        0o33, 0o30, 0o03,
+        0o22, 0o20, 0o02,
+        0o11, 0o10, 0o01,
+        # fmt:on
+    ]
+)
+def insecure_group_other_mode(request: Any) -> int:
+    return request.param
+
+
 # --------------- Controller Fixtures -----------------------------------------
 
 

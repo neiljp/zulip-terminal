@@ -506,25 +506,14 @@ def test__write_zuliprc__fail_file_exists(
     assert error_message == f"zuliprc already exists at {zuliprc_path}"
 
 
-@pytest.mark.parametrize(
-    "mode",
-    [
-        # Avoid reformatting to retain readability of grid of values
-        # fmt:off
-        0o77, 0o70, 0o07,
-        0o66, 0o60, 0o06,
-        0o55, 0o50, 0o05,
-        0o44, 0o40, 0o04,
-        0o33, 0o30, 0o03,
-        0o22, 0o20, 0o02,
-        0o11, 0o10, 0o01,
-        # fmt:on
-    ],
-)
 def test_show_error_if_loading_zuliprc_with_open_permissions(
-    capsys: CaptureFixture[str], zuliprc_factory: ZuliprcFactoryT, mode: int
+    capsys: CaptureFixture[str],
+    zuliprc_factory: ZuliprcFactoryT,
+    insecure_group_other_mode: int,
 ) -> None:
-    zuliprc_path = zuliprc_factory(api={}, config=None, mode=0o600 + mode)
+    zuliprc_path = zuliprc_factory(
+        api={}, config=None, mode=0o600 + insecure_group_other_mode
+    )
     current_mode = stat.filemode(zuliprc_path.stat().st_mode)
 
     with pytest.raises(SystemExit) as e:
