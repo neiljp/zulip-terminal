@@ -320,8 +320,8 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     tmp_path, unusable_path = unreadable_dir
 
     # This is default base path to use
-    zuliprc_path = os.path.join(str(tmp_path), path_to_use)
-    monkeypatch.setenv("HOME", zuliprc_path)
+    base_zuliprc_directory = tmp_path / path_to_use
+    monkeypatch.setenv("HOME", str(base_zuliprc_directory))
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
@@ -336,7 +336,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     expected_line = (
         "\x1b[91m"
         f"{expected_exception}: zuliprc could not be created "
-        f"at {os.path.join(zuliprc_path, 'zuliprc')}"
+        f"at {base_zuliprc_directory / 'zuliprc'}"
         "\x1b[0m"
     )
     assert lines[-1] == expected_line
@@ -478,17 +478,19 @@ def test_exit_with_error(
 def test__write_zuliprc__success(
     tmp_path: Path, id: str = "id", key: str = "key", url: str = "url"
 ) -> None:
-    path = os.path.join(str(tmp_path), "zuliprc")
+    zuliprc_path = tmp_path / "zuliprc"
 
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
+    error_message = _write_zuliprc(
+        str(zuliprc_path), api_key=key, server_url=url, login_id=id
+    )
 
     assert error_message == ""
 
     expected_contents = f"[api]\nemail={id}\nkey={key}\nsite={url}"
-    with open(path) as f:
+    with open(zuliprc_path) as f:
         assert f.read() == expected_contents
 
-    assert stat.filemode(os.stat(path).st_mode)[-6:] == 6 * "-"
+    assert stat.filemode(os.stat(zuliprc_path).st_mode)[-6:] == 6 * "-"
 
 
 def test__write_zuliprc__fail_file_exists(
