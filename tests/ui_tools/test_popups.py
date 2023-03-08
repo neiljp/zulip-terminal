@@ -876,18 +876,19 @@ class TestMsgInfoView:
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
 
-    def test_pop_up_info(self, message_fixture):
-        msg_test = MsgInfoView(
+    def test_pop_up_info_order(self, message_fixture: Message) -> None:
+        topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
+        message_links = OrderedDict([("image.jpg", ("image", 1, True))])
+        msg_info_view = MsgInfoView(
             self.controller,
             message_fixture,
-            "Message Information",
-            OrderedDict([("https://bar.com", ("topic", 1, True))]),
-            OrderedDict([("image.jpg", ("image", 1, True))]),
-            list(),
+            title="Message Information",
+            topic_links=topic_links,
+            message_links=message_links,
+            time_mentions=list(),
         )
-        meg_button = msg_test.button_widgets
-        assert meg_button == [OrderedDict([("https://bar.com", ("topic", 1, True))]),OrderedDict([('image.jpg', ('image', 1, True))])]
-
+        msg_links = msg_info_view.button_widgets
+        assert msg_links == [topic_links, message_links]
 
     def test_keypress_any_key(
         self, widget_size: Callable[[Widget], urwid_Size]
