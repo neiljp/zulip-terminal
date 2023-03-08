@@ -490,7 +490,7 @@ def test__write_zuliprc__success(
     with open(zuliprc_path) as f:
         assert f.read() == expected_contents
 
-    assert stat.filemode(os.stat(zuliprc_path).st_mode)[-6:] == 6 * "-"
+    assert stat.filemode(zuliprc_path.stat().st_mode)[-6:] == 6 * "-"
 
 
 def test__write_zuliprc__fail_file_exists(
@@ -525,7 +525,7 @@ def test_show_error_if_loading_zuliprc_with_open_permissions(
     capsys: CaptureFixture[str], zuliprc_factory: ZuliprcFactoryT, mode: int
 ) -> None:
     zuliprc_path = zuliprc_factory(api={}, config=None, mode=0o600 + mode)
-    current_mode = stat.filemode(os.stat(zuliprc_path).st_mode)
+    current_mode = stat.filemode(zuliprc_path.stat().st_mode)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", str(zuliprc_path)])
