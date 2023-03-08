@@ -104,11 +104,6 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
     assert captured.err == ""
 
 
-@pytest.fixture
-def minimal_valid_zuliprc(zuliprc_factory: ZuliprcFactoryT) -> Path:
-    return zuliprc_factory(api=dict(site="", key="", email=""), config=None)
-
-
 def test_valid_zuliprc_but_no_connection(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,

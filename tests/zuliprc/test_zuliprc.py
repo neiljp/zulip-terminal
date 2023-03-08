@@ -1,4 +1,5 @@
 import stat
+from pathlib import Path
 from typing import Dict, Optional, Set
 
 import pytest
@@ -36,19 +37,13 @@ def test_security_issues_present__return_current_permissions_str(
     assert zuliprc_file.security_issues_present() == expected_text
 
 
-def test_validate_structure__no_errors(zuliprc_factory: ZuliprcFactoryT) -> None:
-    zuliprc_path = zuliprc_factory(
-        api={"email": "", "key": "", "site": ""}, config=None
-    )
-    zuliprc_file = ZuliprcFile(zuliprc_path)
+def test_validate_structure__no_errors(minimal_valid_zuliprc: Path) -> None:
+    zuliprc_file = ZuliprcFile(minimal_valid_zuliprc)
     assert zuliprc_file.validate_structure() == []
 
 
-def test_validate_structure__file_missing(zuliprc_factory: ZuliprcFactoryT) -> None:
-    zuliprc_path = zuliprc_factory(
-        api={"email": "", "key": "", "site": ""}, config=None
-    )
-    bad_path = zuliprc_path.parent / "zuliprc2"
+def test_validate_structure__file_missing(minimal_valid_zuliprc: Path) -> None:
+    bad_path = minimal_valid_zuliprc.parent / "zuliprc2"
     zuliprc_file = ZuliprcFile(bad_path)
     assert zuliprc_file.validate_structure() == [f"Failed to load '{bad_path}'"]
 

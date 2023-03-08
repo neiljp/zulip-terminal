@@ -75,6 +75,11 @@ def zuliprc_factory(tmp_path: Path) -> ZuliprcFactoryT:
     return func
 
 
+@pytest.fixture
+def minimal_valid_zuliprc(zuliprc_factory: ZuliprcFactoryT) -> Path:
+    return zuliprc_factory(api=dict(site="", key="", email=""), config=None)
+
+
 @pytest.fixture(
     params=[
         # Avoid reformatting to retain readability of grid of values
