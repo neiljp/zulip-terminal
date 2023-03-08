@@ -112,3 +112,10 @@ def test_validate_structure__duplicate_api_section(
 ) -> None:
     zuliprc_file = ZuliprcFile(zuliprc_with_duplicate_api_keys)
     assert zuliprc_file.validate_structure() == ["Duplicate keys in [api] section"]
+
+
+def test_validate_structure__duplicate_key_in_option_section(
+    zuliprc_with_duplicate_option_keys: Path,
+) -> None:
+    zuliprc_file = ZuliprcFile(zuliprc_with_duplicate_option_keys)
+    assert zuliprc_file.validate_structure() == ["Duplicate keys in [zterm] section"]
