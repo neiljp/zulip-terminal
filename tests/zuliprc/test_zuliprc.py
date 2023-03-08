@@ -105,3 +105,10 @@ def test_validate_structure__api_section_invalid(
     zuliprc_path = zuliprc_factory(api=api, config=None)
     zuliprc_file = ZuliprcFile(zuliprc_path)
     assert set(zuliprc_file.validate_structure()) == expected_errors
+
+
+def test_validate_structure__duplicate_api_section(
+    zuliprc_with_duplicate_api_keys: Path,
+) -> None:
+    zuliprc_file = ZuliprcFile(zuliprc_with_duplicate_api_keys)
+    assert zuliprc_file.validate_structure() == ["Duplicate keys in [api] section"]

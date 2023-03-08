@@ -29,6 +29,8 @@ class ZuliprcFile:
             return ["No section header found in file (eg. [api])"]
         except configparser.ParsingError:
             return ["Could not parse file"]
+        except configparser.DuplicateOptionError:
+            return ["Duplicate keys in [api] section"]
         if len(files_read) == 0:
             return [f"Failed to load '{self._zuliprc_path}'"]
         if not config.has_section("api"):

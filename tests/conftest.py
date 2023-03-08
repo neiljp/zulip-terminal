@@ -76,6 +76,20 @@ def zuliprc_factory(tmp_path: Path) -> ZuliprcFactoryT:
 
 
 @pytest.fixture
+def zuliprc_with_duplicate_api_keys(tmp_path: Path) -> Path:
+    zuliprc_path = tmp_path / "zuliprc"
+    api = dict(site="", key="", email="")
+    with open(zuliprc_path, "w") as f:
+        f.write("[api]\n")
+        for key, value in api.items():
+            f.write(f"{key}={value}\n")
+        for key, value in api.items():
+            f.write(f"{key}={value}\n")
+    zuliprc_path.chmod(0o600)
+    return zuliprc_path
+
+
+@pytest.fixture
 def minimal_valid_zuliprc(zuliprc_factory: ZuliprcFactoryT) -> Path:
     return zuliprc_factory(api=dict(site="", key="", email=""), config=None)
 
