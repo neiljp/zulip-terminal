@@ -1,8 +1,9 @@
 """
 Defines ZuliprcFile class to work with zuliprc files (holding login details & settings)
 """
+import stat
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 
 class ZuliprcFile:
@@ -10,6 +11,10 @@ class ZuliprcFile:
         """Initialize with the path to the zuliprc file to work with."""
         self._zuliprc_path: Path = Path(zuliprc_path)
 
-    def security_issues_present(self) -> None:
-        """Determine if any security issues are present."""
+    def security_issues_present(self) -> Optional[str]:
+        """Return security issues present as permissions, or None otherwise."""
+        mode = self._zuliprc_path.stat().st_mode
+        is_readable_by_group_or_others = mode & (stat.S_IRWXG | stat.S_IRWXO)
+        if is_readable_by_group_or_others:
+            return stat.filemode(mode)
         return None
