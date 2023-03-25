@@ -1,36 +1,59 @@
-<!-- Please see https://github.com/zulip/zulip-terminal#contributor-guidelines ! -->
+<!--
+Assuming you have a development environment set up to create a Pull Request,
+please read https://github.com/zulip/zulip-terminal#development-tasks
+for supporting documentation to help with the following -->
 
-**What does this PR do?**  <!-- Overall description goes here -->
+<!-- Generally see README for documentation, or ask in #zulip-terminal if unclear -->
 
-<!-- If fixing a filed bug or new feature, add 'Fixes #<issue>' or 'Partial fix for #<issue>' -->
+**What does this PR do, and why?**
+<!-- Overall description goes here -->
 
-<!-- Add a link to a discussion on chat.zulip.org, if relevant -->
 
-**Tested?** <!-- Fine to leave some of these unchecked if this is a draft/work-in-progress -->
-- [ ] Manually
-- [ ] Existing tests (adapted, if necessary)
-- [ ] New tests added (for any new behavior)
-- [ ] Passed linting & tests (each commit)
-<!-- Code must pass CI (GitHub Actions) before merging - look for the green tick! -->
 
-<!-- See https://github.com/zulip/zulip-terminal#commit-style -->
-**Commit flow** <!-- if more than one commit; add/delete/fill-in as appropriate -->
-<!-- For example:
-- first commit doing some thing
-- maybe multiple commits doing similar things
+**Initial notes & questions**
+<!-- Examples below; DELETE SOME/ALL OF SECTION IF NOT RELEVANT
+- [ ] This differs from the numbered issue / discussion in #zulip-terminal ... because ...
+- [ ] This doesn't quite work yet due to...
+- [ ] This appears to expose another bug since...
+- [ ] This starts with feature X first, and feature Y will come later
+- [ ] Not sure why there's a problem with...
+- [ ] should this do Z?
+- [ ] <your concern here>
 -->
 
-**Notes & Questions** <!-- if any; add/delete/fill-in as appropriate -->
-<!-- For example:
-- this doesn't include feature X (yet?)
-- unsure about Y
-- should this do Z?
+**Any interactions with other work?**
+<!-- Examples below; DELETE SOME/ALL OF SECTION IF NOT RELEVANT
+- [ ] Waiting on #<PR> to merge / partial merge
+- [ ] Blocks work on #<issue-or-PR>
+- [ ] Would make #<issue-or-PR> easier
+- [ ] This would enable a whole new idea/feature/class-of-features/refactoring
 -->
 
-**Interactions** <!-- if any; add/delete/fill-in as appropriate -->
-<!-- eg.
-- Waiting on #<PR>
-- Blocks #<PR>
--->
+**External reason(s) for PR?**
+<!-- Select all that apply, replacing <blanks> by numbers/names/links -->
+- [ ] Discussed in **#zulip-terminal** in <topic-name or link>
+- [ ] Fixes #<issue> fully
+- [ ] Partial fix for #<issue>
+- [ ] Builds upon previous unmerged work in #<PR>
+- [ ] Is a follow-up to work in #<PR>
+- [ ] Not noted elsewhere (none of the above)
 
-**Visual changes** <!-- if any; add/delete/fill-in with screenshot/diagram as appropriate -->
+**How did you test this?**
+<!-- Select all that apply -->
+- [ ] Manually - Behavior changes
+- [ ] Manually - Visual changes
+- [ ] Adapting existing tests
+- [ ] Adding tests for new behavior
+- [ ] Existing tests should cover this (*only a refactor of tested code*)
+
+**Self-review checklist**
+Each commit:
+- [ ] Is a [minimal coherent idea](https://github.com/zulip/zulip-terminal#structuring-commits---speeding-up-reviews-merging--development)
+- [ ] Has a commit summary following the [documented style](https://github.com/zulip/zulip-terminal#structuring-commits---speeding-up-reviews-merging--development) (title & body)
+- [ ] Has a commit summary describing the  motivation and reasoning for the change
+- [ ] Individually passes linting and tests
+- [ ] Contains test additions for new behavior
+- [ ] Flows clearly from a previous commit in the branch (if any)
+
+**Visual changes**
+<!-- Include screenshot/diagrm; DELETE SECTION IF NO VISUAL CHANGE -->
