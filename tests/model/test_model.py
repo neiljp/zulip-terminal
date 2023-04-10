@@ -1,3 +1,4 @@
+import copy
 import json
 from collections import OrderedDict
 from copy import deepcopy
@@ -3630,6 +3631,172 @@ class TestModel:
         assert (
             initial_data["realm_users"][1][new_data_field]
             == event["person"][event_field]
+        )
+
+    @pytest.mark.parametrize("user_id", [11, 12])
+    @pytest.mark.parametrize(
+        "update_data, expected_modified_field_id",
+        [
+            case(
+                {
+                    "id": 1,
+                    "value": "7237032732",
+                    "rendered_value": "<p>7237032732</p>",
+                },
+                "1",
+                id="Short Text 1",
+            ),
+            case(
+                {
+                    "id": 2,
+                    "value": "Complexity",
+                    "rendered_value": "<p>Complexity</p>",
+                },
+                "2",
+                id="Long Text",
+            ),
+            case(
+                {
+                    "id": 3,
+                    "value": "pizza",
+                    "rendered_value": "<p>pizza</p>",
+                },
+                "3",
+                id="Short Text 2",
+            ),
+            case(
+                {
+                    "id": 4,
+                    "value": "0",
+                },
+                "4",
+                id="List of Options",
+            ),
+            case(
+                {
+                    "id": 5,
+                    "value": "2023-04-22",
+                },
+                "5",
+                id="Date Picker",
+            ),
+            case(
+                {
+                    "id": 6,
+                    "value": "https://www.google.com",
+                },
+                "6",
+                id="Link",
+            ),
+            case(
+                {
+                    "id": 7,
+                    "value": "[13]",
+                },
+                "7",
+                id="Person Picker",
+            ),
+            case(
+                {
+                    "id": 9,
+                    "value": "githubmaster",
+                },
+                "9",
+                id="External Account",
+            ),
+            case(
+                {
+                    "id": 12,
+                    "value": "she/her",
+                },
+                "12",
+                id="Pronouns",
+            ),
+        ],
+    )
+    def test__handle_realm_user_event_custom_profile_data(
+        self,
+        user_id,
+        update_data,
+        expected_modified_field_id,
+        model,
+        initial_data,
+        custom_profile_data_fixture,
+    ):
+        REALM_USER_INDEX = user_id - 10
+        assert initial_data["realm_users"][REALM_USER_INDEX]["user_id"] == user_id
+
+        person = {"custom_profile_field": update_data}
+        person["user_id"] = user_id
+        event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
+
+        profile_data_before_update = (
+            copy.deepcopy(custom_profile_data_fixture) if user_id == 12 else {}
+        )
+
+        model._handle_realm_user_event(event)
+
+        expected_profile_data = {
+            key: update_data[key] for key in update_data if key != "id"
+        }
+
+        assert (
+            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][
+                expected_modified_field_id
+            ]
+            == expected_profile_data
+        )
+        assert all(
+            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][field_id]
+            == profile_data_before_update[field_id]
+            for field_id in profile_data_before_update
+            if field_id != expected_modified_field_id
+        )
+
+    @pytest.mark.parametrize("user_id", [11, 12])
+    @pytest.mark.parametrize(
+        "update_data, expected_removed_field_id",
+        [
+            (
+                {
+                    "id": 8,
+                    "value": None,
+                },
+                "8",
+            ),
+        ],
+    )
+    def test__handle_realm_user_event_custom_profile_data_remove_data(
+        self,
+        user_id,
+        update_data,
+        expected_removed_field_id,
+        model,
+        initial_data,
+        custom_profile_data_fixture,
+    ):
+        REALM_USER_INDEX = user_id - 10
+        assert initial_data["realm_users"][REALM_USER_INDEX]["user_id"] == user_id
+
+        person = {"custom_profile_field": update_data}
+        person["user_id"] = user_id
+        event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
+
+        profile_data_before_update = (
+            copy.deepcopy(custom_profile_data_fixture) if user_id == 12 else {}
+        )
+
+        model._handle_realm_user_event(event)
+
+        assert (
+            expected_removed_field_id
+            not in initial_data["realm_users"][REALM_USER_INDEX]["profile_data"]
+        )
+        assert all(
+            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][field_id]
+            == profile_data_before_update[field_id]
+            for field_id in profile_data_before_update
+            if field_id != expected_removed_field_id
         )
 
     @pytest.mark.parametrize("value", [True, False])
