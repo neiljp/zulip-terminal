@@ -4039,7 +4039,7 @@ class TestModel:
             ]
         }
 
-        unread_topic = model.get_next_unread_topic(current_message=current_message_id)
+        unread_topic = model.next_unread_topic_from_message_id(current_message_id)
 
         assert unread_topic == next_unread_topic
 

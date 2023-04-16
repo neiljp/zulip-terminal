@@ -901,7 +901,9 @@ class Model:
             return (stream_id, topic)
         return None
 
-    def get_next_unread_topic(self, current_message: int) -> Optional[Tuple[int, str]]:
+    def next_unread_topic_from_message_id(
+        self, current_message: int
+    ) -> Optional[Tuple[int, str]]:
         current_topic = self.stream_topic_from_message_id(current_message)
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
         next_topic = False
