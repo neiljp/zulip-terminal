@@ -312,7 +312,7 @@ class BaseUpdateMessageEvent(TypedDict):
     # - move one message (change_one) or this message and those later (change_later)
     message_id: int
     # Present in both cases; message_id may change read/mention/alert status
-    # flags: List[MessageFlag]
+    flags: List[MessageFlag]
 
     # Omitted before Zulip 5.0 / ZFL 114 for rendering-only updates
     # Subsequently always present (and None for rendering_only==True)

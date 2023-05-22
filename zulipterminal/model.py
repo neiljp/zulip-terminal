@@ -1600,6 +1600,10 @@ class Model:
         if indexed_message:
             self.index["edited_messages"].add(message_id)
 
+            # FIXME: If flags change, this should certainly trigger changes
+            #        eg. unread counts, alert words, mentions
+            indexed_message["flags"] = event["flags"]
+
         # Update the rendered content, if the message is indexed
         if "rendered_content" in event and indexed_message:
             content_event = cast(UpdateMessageContentEvent, event)

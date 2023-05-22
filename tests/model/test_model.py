@@ -2087,12 +2087,17 @@ class TestModel:
             case(
                 {  # Only subject of 1 message is updated.
                     "message_id": 1,
+                    "flags": ["read"],
                     "orig_subject": "old subject",
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 1,
                 {
                     "messages": {
@@ -2102,6 +2107,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "new subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2109,6 +2115,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2123,12 +2130,17 @@ class TestModel:
             case(
                 {  # Subject of 2 messages is updated
                     "message_id": 1,
+                    "flags": ["read"],
                     "orig_subject": "old subject",
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1, 2],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 2,
                 {
                     "messages": {
@@ -2138,6 +2150,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "new subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2145,6 +2158,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "new subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2159,11 +2173,16 @@ class TestModel:
             case(
                 {  # Message content is updated
                     "message_id": 1,
+                    "flags": ["read"],
                     "stream_id": 10,
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 1,
                 {
                     "messages": {
@@ -2173,6 +2192,7 @@ class TestModel:
                             "content": "<p>new content</p>",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2180,6 +2200,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2194,11 +2215,16 @@ class TestModel:
             case(
                 {
                     "message_id": 1,
+                    "flags": ["read"],
                     "stream_id": 10,
                     "rendered_content": "<p>/me has new content</p>",
                     "is_me_message": True,
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 1,
                 {
                     "messages": {
@@ -2208,6 +2234,7 @@ class TestModel:
                             "content": "<p>/me has new content</p>",
                             "subject": "old subject",
                             "is_me_message": True,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2215,6 +2242,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2229,11 +2257,16 @@ class TestModel:
             case(
                 {
                     "message_id": 1,
+                    "flags": ["read"],
                     "stream_id": 10,
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                 },
-                {"is_me_message": True},
+                {
+                    "is_me_message": True,
+                    "flags": ["read"],
+                    "content": "/me dances (old)",
+                },
                 1,
                 {
                     "messages": {
@@ -2243,6 +2276,7 @@ class TestModel:
                             "content": "<p>new content</p>",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2250,6 +2284,7 @@ class TestModel:
                             "content": "/me dances (old)",
                             "subject": "old subject",
                             "is_me_message": True,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2262,8 +2297,93 @@ class TestModel:
                 id="Message content is updated; was a me-message, not now",
             ),
             case(
+                {
+                    "message_id": 1,
+                    "flags": ["read", "mentioned"],
+                    "stream_id": 10,
+                    "rendered_content": "<p>@**Human Myself** Hi!</p>",
+                    "is_me_message": False,
+                },
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
+                1,
+                {
+                    "messages": {
+                        1: {
+                            "id": 1,
+                            "stream_id": 10,
+                            "content": "<p>@**Human Myself** Hi!</p>",
+                            "subject": "old subject",
+                            "is_me_message": False,
+                            "flags": ["read", "mentioned"],
+                        },
+                        2: {
+                            "id": 2,
+                            "stream_id": 10,
+                            "content": "old content",
+                            "subject": "old subject",
+                            "is_me_message": False,
+                            "flags": ["read"],
+                        },
+                    },
+                    "topic_msg_ids": {
+                        10: {"new subject": set(), "old subject": {1, 2}},
+                    },
+                    "edited_messages": {1},
+                    "topics": {10: ["new subject", "old subject"]},
+                },
+                False,
+                id="Message content is updated; now a mention (with flag)",
+            ),
+            case(
+                {
+                    "message_id": 1,
+                    "flags": ["read"],
+                    "stream_id": 10,
+                    "rendered_content": "new content",
+                    "is_me_message": False,
+                },
+                {
+                    "is_me_message": False,
+                    "flags": ["read", "mentioned"],
+                    "content": "<p>@**Human Myself** Hi!</p>",
+                },
+                1,
+                {
+                    "messages": {
+                        1: {
+                            "id": 1,
+                            "stream_id": 10,
+                            "content": "new content",
+                            "subject": "old subject",
+                            "is_me_message": False,
+                            "flags": ["read"],
+                        },
+                        2: {
+                            "id": 2,
+                            "stream_id": 10,
+                            "content": "<p>@**Human Myself** Hi!</p>",
+                            "subject": "old subject",
+                            "is_me_message": False,
+                            "flags": ["read", "mentioned"],
+                        },
+                    },
+                    "topic_msg_ids": {
+                        10: {"new subject": set(), "old subject": {1, 2}},
+                    },
+                    "edited_messages": {1},
+                    "topics": {10: ["new subject", "old subject"]},
+                },
+                False,
+                id="Message content is updated; was a mention (with flag)",
+            ),
+            case(
                 {  # Both message content and subject is updated.
                     "message_id": 1,
+                    "flags": ["read"],
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                     "orig_subject": "old subject",
@@ -2271,7 +2391,11 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 2,
                 {  # 2=update of subject & content
                     "messages": {
@@ -2281,6 +2405,7 @@ class TestModel:
                             "content": "<p>new content</p>",
                             "subject": "new subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2288,6 +2413,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2302,9 +2428,14 @@ class TestModel:
             case(
                 {  # Some new type of update which we don't handle yet.
                     "message_id": 1,
+                    "flags": ["read"],
                     "foo": "boo",
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 0,
                 {
                     "messages": {
@@ -2314,6 +2445,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2321,6 +2453,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2335,6 +2468,7 @@ class TestModel:
             case(
                 {  # message_id not present in index, topic view closed.
                     "message_id": 3,
+                    "flags": ["read"],
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                     "orig_subject": "old subject",
@@ -2342,7 +2476,11 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 0,
                 {
                     "messages": {
@@ -2352,6 +2490,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2359,6 +2498,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2373,6 +2513,7 @@ class TestModel:
             case(
                 {  # message_id not present in index, topic view is enabled.
                     "message_id": 3,
+                    "flags": ["read"],
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                     "orig_subject": "old subject",
@@ -2380,7 +2521,11 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 0,
                 {
                     "messages": {
@@ -2390,6 +2535,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2397,6 +2543,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2411,6 +2558,7 @@ class TestModel:
             case(
                 {  # Message content is updated and topic view is enabled.
                     "message_id": 1,
+                    "flags": ["read"],
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                     "orig_subject": "old subject",
@@ -2418,7 +2566,11 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                {"is_me_message": False},
+                {
+                    "is_me_message": False,
+                    "flags": ["read"],
+                    "content": "old content",
+                },
                 2,
                 {
                     "messages": {
@@ -2428,6 +2580,7 @@ class TestModel:
                             "content": "<p>new content</p>",
                             "subject": "new subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
@@ -2435,6 +2588,7 @@ class TestModel:
                             "content": "old content",
                             "subject": "old subject",
                             "is_me_message": False,
+                            "flags": ["read"],
                         },
                     },
                     "topic_msg_ids": {
@@ -2460,12 +2614,12 @@ class TestModel:
     ):
         event["type"] = "update_message"
 
-        initially_me_message = initial_message_variation["is_me_message"]
         initial_message_data = {  # for all messages in index, base data
             "stream_id": 10,
-            "content": "/me dances (old)" if initially_me_message else "old content",
+            "content": initial_message_variation["content"],
             "subject": "old subject",
-            "is_me_message": initially_me_message,
+            "is_me_message": initial_message_variation["is_me_message"],
+            "flags": initial_message_variation["flags"],
         }
 
         model.index = {
