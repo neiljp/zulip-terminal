@@ -2081,7 +2081,7 @@ class TestModel:
         )
 
     @pytest.mark.parametrize(
-        "event, initially_me_message,"
+        "event, initial_message_variation,"
         "expected_times_messages_rerendered, expected_index, topic_view_enabled",
         [
             case(
@@ -2092,7 +2092,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                False,
+                {"is_me_message": False},
                 1,
                 {
                     "messages": {
@@ -2128,7 +2128,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1, 2],
                 },
-                False,
+                {"is_me_message": False},
                 2,
                 {
                     "messages": {
@@ -2163,7 +2163,7 @@ class TestModel:
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                 },
-                False,
+                {"is_me_message": False},
                 1,
                 {
                     "messages": {
@@ -2198,7 +2198,7 @@ class TestModel:
                     "rendered_content": "<p>/me has new content</p>",
                     "is_me_message": True,
                 },
-                False,
+                {"is_me_message": False},
                 1,
                 {
                     "messages": {
@@ -2233,7 +2233,7 @@ class TestModel:
                     "rendered_content": "<p>new content</p>",
                     "is_me_message": False,
                 },
-                True,
+                {"is_me_message": True},
                 1,
                 {
                     "messages": {
@@ -2271,7 +2271,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                False,
+                {"is_me_message": False},
                 2,
                 {  # 2=update of subject & content
                     "messages": {
@@ -2304,7 +2304,7 @@ class TestModel:
                     "message_id": 1,
                     "foo": "boo",
                 },
-                False,
+                {"is_me_message": False},
                 0,
                 {
                     "messages": {
@@ -2342,7 +2342,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
-                False,
+                {"is_me_message": False},
                 0,
                 {
                     "messages": {
@@ -2380,7 +2380,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
-                False,
+                {"is_me_message": False},
                 0,
                 {
                     "messages": {
@@ -2418,7 +2418,7 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
-                False,
+                {"is_me_message": False},
                 2,
                 {
                     "messages": {
@@ -2453,13 +2453,14 @@ class TestModel:
         mocker,
         model,
         event,
-        initially_me_message,
+        initial_message_variation,
         expected_index,
         expected_times_messages_rerendered,
         topic_view_enabled,
     ):
         event["type"] = "update_message"
 
+        initially_me_message = initial_message_variation["is_me_message"]
         initial_message_data = {  # for all messages in index, base data
             "stream_id": 10,
             "content": "/me dances (old)" if initially_me_message else "old content",
