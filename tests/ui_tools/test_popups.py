@@ -343,7 +343,6 @@ class TestUserInfoView:
     )
     def test__fetch_user_data(
         self,
-        mocker: MockerFixture,
         to_vary_in_each_user: Dict[str, Any],
         expected_key: str,
         expected_value: Optional[str],
@@ -391,7 +390,6 @@ class TestUserInfoView:
     )
     def test__fetch_user_data__custom_profile_data(
         self,
-        mocker: MockerFixture,
         to_vary_in_each_user: List[CustomProfileData],
         expected_value: Dict[str, str],
     ) -> None:
