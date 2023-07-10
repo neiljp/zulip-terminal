@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import pytest
 from pytest import param as case
@@ -341,7 +341,7 @@ class TestUserInfoView:
             "user_is_member",
         ],
     )
-    def test__fetch_user_data(
+    def test__polish_user_data(
         self,
         to_vary_in_each_user: Dict[str, Any],
         expected_key: str,
@@ -349,10 +349,8 @@ class TestUserInfoView:
     ) -> None:
         data = dict(self.user_data, **to_vary_in_each_user)
 
-        self.controller.model.get_user_info.return_value = data
-
-        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
-            self.controller, 1
+        display_data, custom_profile_data = self.user_info_view._polish_user_data(
+            self.controller, cast(TidiedUserInfo, data)
         )
 
         assert display_data.get(expected_key, None) == expected_value
@@ -388,7 +386,7 @@ class TestUserInfoView:
             ),
         ],
     )
-    def test__fetch_user_data__custom_profile_data(
+    def test__polish_user_data__custom_profile_data(
         self,
         to_vary_in_each_user: List[CustomProfileData],
         expected_value: Dict[str, str],
@@ -396,19 +394,15 @@ class TestUserInfoView:
         data = dict(self.user_data)
         data["custom_profile_data"] = to_vary_in_each_user
 
-        self.controller.model.get_user_info.return_value = data
-
-        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
-            self.controller, 1
+        display_data, custom_profile_data = self.user_info_view._polish_user_data(
+            self.controller, cast(TidiedUserInfo, data)
         )
 
         assert custom_profile_data == expected_value
 
-    def test__fetch_user_data_USER_NOT_FOUND(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(self.controller.model, "get_user_info", return_value=dict())
-
-        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
-            self.controller, 1
+    def test__polish_user_data__USER_NOT_FOUND(self, mocker: MockerFixture) -> None:
+        display_data, custom_profile_data = self.user_info_view._polish_user_data(
+            self.controller, None
         )
 
         assert display_data["Name"] == "(Unavailable)"

@@ -1083,8 +1083,10 @@ class AboutView(PopUpView):
 
 class UserInfoView(PopUpView):
     def __init__(self, controller: Any, user_id: int, title: str, command: str) -> None:
-        display_data, display_custom_profile_data = self._fetch_user_data(
-            controller, user_id
+        data: Optional[TidiedUserInfo] = controller.model.get_user_info(user_id)
+
+        display_data, display_custom_profile_data = self._polish_user_data(
+            controller, data
         )
 
         user_details = [
@@ -1105,12 +1107,9 @@ class UserInfoView(PopUpView):
         super().__init__(controller, widgets, command, popup_width, title)
 
     @staticmethod
-    def _fetch_user_data(
-        controller: Any, user_id: int
+    def _polish_user_data(
+        controller: Any, data: Optional[TidiedUserInfo]
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
-        # Get user data from model
-        data: Optional[TidiedUserInfo] = controller.model.get_user_info(user_id)
-
         display_custom_profile_data: Dict[str, str] = {}
         if not data:
             display_data = {
