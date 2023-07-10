@@ -1165,9 +1165,8 @@ class UserInfoView(PopUpView):
                         for user in field["value"]
                     ]
                     field["value"] = ", ".join(user_names)
-                assert isinstance(
-                    field["value"], str
-                )  # After conversion of field type 6, all values are str
+                # After conversion of field type 6, all values are str
+                assert isinstance(field["value"], str)
 
                 display_custom_profile_data[field["label"]] = field["value"]
 
