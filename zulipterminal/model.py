@@ -1933,18 +1933,15 @@ class Model:
                         profile_field_id = str(profile_field_data["id"])
 
                         if profile_field_data["value"] is None:
-                            realm_user["profile_data"].pop(
-                                profile_field_id, None
-                            )  # Default value `None` if field does not exist
+                            # Ignore if field does not exist
+                            realm_user["profile_data"].pop(profile_field_id, None)
                         else:
                             updated_data = {
                                 key: value
                                 for key, value in profile_field_data.items()
                                 if key != "id"
                             }
-
                             realm_user["profile_data"][profile_field_id] = updated_data
-
                     else:
                         realm_user.update(updated_details)
                     break
