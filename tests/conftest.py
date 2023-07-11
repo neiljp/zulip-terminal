@@ -158,11 +158,11 @@ def users_fixture(
             }
         )
     # Add custom profile data to user 12
-    for i in range(len(users)):
-        user = users[i]
-        user["profile_data"] = {}
+    for user in users:
         if user["user_id"] == 12:
             user["profile_data"] = custom_profile_data_fixture
+        else:
+            user["profile_data"] = {}
     return users
 
 
