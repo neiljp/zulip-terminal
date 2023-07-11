@@ -3615,7 +3615,7 @@ class TestModel:
             "delivery_email",
         ],
     )
-    def test__handle_realm_user_event(
+    def test__handle_realm_user_event__general(
         self, person, event_field, updated_field_if_different, model, initial_data
     ):
         # id 11 matches initial_data["realm_users"][1] in the initial_data fixture
@@ -3633,7 +3633,7 @@ class TestModel:
             == event["person"][event_field]
         )
 
-    @pytest.mark.parametrize("user_id", [11, 12])
+    @pytest.mark.parametrize("user_id", [11, 12], ids=["no_custom", "many_custom"])
     @pytest.mark.parametrize(
         "update_data, expected_modified_field_id",
         [
@@ -3714,7 +3714,7 @@ class TestModel:
             ),
         ],
     )
-    def test__handle_realm_user_event_custom_profile_data(
+    def test__handle_realm_user_event__custom_profile_data__update_data(
         self,
         user_id,
         update_data,
@@ -3724,36 +3724,36 @@ class TestModel:
         custom_profile_data_fixture,
     ):
         REALM_USER_INDEX = user_id - 10
-        assert initial_data["realm_users"][REALM_USER_INDEX]["user_id"] == user_id
+        user_data = initial_data["realm_users"][REALM_USER_INDEX]
+        # Ensure indices match user id
+        assert user_data["user_id"] == user_id, "unexpected test configuration"
+        # Updated value is expected to vary from existing value
+        assert (
+            user_data["profile_data"].get(update_data["id"], {}).get("value", None)
+            != update_data["value"]
+        ), "unexpected test configuration"
 
-        person = {"custom_profile_field": update_data}
-        person["user_id"] = user_id
+        person = {"custom_profile_field": update_data, "user_id": user_id}
         event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
 
-        profile_data_before_update = (
-            copy.deepcopy(custom_profile_data_fixture) if user_id == 12 else {}
-        )
-
-        model._handle_realm_user_event(event)
-
+        profile_data_before_update = copy.deepcopy(user_data["profile_data"])
         expected_profile_data = {
             key: update_data[key] for key in update_data if key != "id"
         }
 
+        model._handle_realm_user_event(event)
+
         assert (
-            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][
-                expected_modified_field_id
-            ]
+            user_data["profile_data"][expected_modified_field_id]
             == expected_profile_data
         )
         assert all(
-            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][field_id]
-            == profile_data_before_update[field_id]
+            user_data["profile_data"][field_id] == profile_data_before_update[field_id]
             for field_id in profile_data_before_update
             if field_id != expected_modified_field_id
         )
 
-    @pytest.mark.parametrize("user_id", [11, 12])
+    @pytest.mark.parametrize("user_id", [11, 12], ids=["no_custom", "many_custom"])
     @pytest.mark.parametrize(
         "update_data, expected_removed_field_id",
         [
@@ -3766,7 +3766,7 @@ class TestModel:
             ),
         ],
     )
-    def test__handle_realm_user_event_custom_profile_data_remove_data(
+    def test__handle_realm_user_event__custom_profile_data__remove_data(
         self,
         user_id,
         update_data,
@@ -3776,25 +3776,20 @@ class TestModel:
         custom_profile_data_fixture,
     ):
         REALM_USER_INDEX = user_id - 10
-        assert initial_data["realm_users"][REALM_USER_INDEX]["user_id"] == user_id
+        user_data = initial_data["realm_users"][REALM_USER_INDEX]
+        # Ensure indices match user id
+        assert user_data["user_id"] == user_id, "unexpected test configuration"
 
-        person = {"custom_profile_field": update_data}
-        person["user_id"] = user_id
+        person = {"custom_profile_field": update_data, "user_id": user_id}
         event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
 
-        profile_data_before_update = (
-            copy.deepcopy(custom_profile_data_fixture) if user_id == 12 else {}
-        )
+        profile_data_before_update = copy.deepcopy(user_data["profile_data"])
 
         model._handle_realm_user_event(event)
 
-        assert (
-            expected_removed_field_id
-            not in initial_data["realm_users"][REALM_USER_INDEX]["profile_data"]
-        )
+        assert expected_removed_field_id not in user_data["profile_data"]
         assert all(
-            initial_data["realm_users"][REALM_USER_INDEX]["profile_data"][field_id]
-            == profile_data_before_update[field_id]
+            user_data["profile_data"][field_id] == profile_data_before_update[field_id]
             for field_id in profile_data_before_update
             if field_id != expected_removed_field_id
         )
