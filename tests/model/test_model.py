@@ -3721,7 +3721,6 @@ class TestModel:
         expected_modified_field_id,
         model,
         initial_data,
-        custom_profile_data_fixture,
     ):
         REALM_USER_INDEX = user_id - 10
         user_data = initial_data["realm_users"][REALM_USER_INDEX]
@@ -3773,7 +3772,6 @@ class TestModel:
         expected_removed_field_id,
         model,
         initial_data,
-        custom_profile_data_fixture,
     ):
         REALM_USER_INDEX = user_id - 10
         user_data = initial_data["realm_users"][REALM_USER_INDEX]
