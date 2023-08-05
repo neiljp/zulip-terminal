@@ -907,7 +907,7 @@ class Model:
         current_topic = self.stream_topic_from_message_id(current_message)
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
         next_topic = False
-        stream_start = None
+        stream_start: Optional[Tuple[int, str]] = None
         if current_topic is None:
             next_topic = True
         elif current_topic not in unread_topics:
@@ -926,17 +926,16 @@ class Model:
                 if next_topic:
                     if unread_topic == current_topic:
                         return None
-                    elif (
-                        current_topic is None
-                        or unread_topic[0] == current_topic[0]
-                        or stream_start == current_topic
+                    if (
+                        current_topic is not None
+                        and unread_topic[0] != current_topic[0]
+                        and stream_start != current_topic
                     ):
-                        return unread_topic
-                    else:
                         return stream_start
+                    return unread_topic
 
                 if (
-                    not stream_start
+                    stream_start is None
                     and current_topic is not None
                     and unread_topic[0] == current_topic[0]
                 ):
