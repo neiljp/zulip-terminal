@@ -376,7 +376,16 @@ To be a part of it and to contribute to the code, feel free to work on any
 [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
-For commit structure and style, please review the [Commit Style](#commit-style)
+* [Getting the code](https://github.com/zulip/zulip-terminal#getting-zulip-terminal-code-and-connecting-it-to-upstream)
+* [Setting up the development environment](https://github.com/zulip/zulip-terminal#setting-up-a-development-environment)
+* [Development tasks](https://github.com/zulip/zulip-terminal#development-tasks)
+* [Editing the source](https://github.com/zulip/zulip-terminal#editing-the-source)
+* [Running linters & tests](https://github.com/zulip/zulip-terminal#running-linters-and-automated-tests)
+* [Structuring commits](https://github.com/zulip/zulip-terminal#structuring-commits---speeding-up-reviews-merging--development)
+* [Pytest tips](https://github.com/zulip/zulip-terminal#tips-for-working-with-tests-pytest)
+* [Debugging tips](https://github.com/zulip/zulip-terminal#debugging-tips)
+
+For commit structure and style, please review the [Commit Style](#commit-message-style)
 section below.
 
 If you are new to `git` (or not!), you may benefit from the
