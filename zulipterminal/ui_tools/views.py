@@ -1109,12 +1109,14 @@ class AboutView(PopUpView):
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
         transparency_enabled: bool,
+        terminal_cols_rows: Tuple[int, int],
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
             if server_feature_level
             else []
         )
+        cols, rows = terminal_cols_rows
 
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
@@ -1139,6 +1141,7 @@ class AboutView(PopUpView):
                 [
                     ("Platform", detected_platform()),
                     ("Python", detected_python_in_full()),
+                    ("Current terminal size", f"{rows} rows x {cols} columns"),
                 ],
             ),
         ]
