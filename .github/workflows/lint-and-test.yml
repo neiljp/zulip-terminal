@@ -18,10 +18,11 @@ permissions:
 
 env:
   LINTING_PYTHON_VERSION: 3.8
+  RUNNER_VERSION: ubuntu-24.04
 
 jobs:
   mypy:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Type consistency (mypy)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -38,7 +39,7 @@ jobs:
         run: ./tools/run-mypy
 
   ruff:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - PEP8 & more (ruff)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -55,7 +56,7 @@ jobs:
         run: ruff zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   isort:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Import order (isort)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -73,7 +74,7 @@ jobs:
         run: ./tools/run-isort-check
 
   black:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Code format (black)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -90,7 +91,7 @@ jobs:
         run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   spellcheck:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Spellcheck (codespell, typos)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -107,7 +108,7 @@ jobs:
         run: ./tools/run-spellcheck
 
   hotkeys:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Hotkeys & docs sync (lint-hotkeys)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -124,7 +125,7 @@ jobs:
         run: ./tools/lint-hotkeys
 
   docstrings:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Docstrings & docs sync (lint-docstring)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
@@ -141,7 +142,7 @@ jobs:
         run: ./tools/lint-docstring
 
   gitlint:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Lint - Commit text format (gitlint)
     steps:
       - name: 'PR commits +1'
@@ -198,7 +199,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   isolated-commits:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.RUNNER_VERSION }}
     name: Ensure isolated PR commits
     needs:
       - mypy
@@ -237,14 +238,14 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {PYTHON: 3.8, OS: ubuntu-24.04, NAME: "CPython 3.8 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 3.9, OS: ubuntu-24.04, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: "3.10", OS: ubuntu-24.04, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: "3.11", OS: ubuntu-24.04, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 'pypy-3.7', OS: ubuntu-24.04, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 'pypy-3.8', OS: ubuntu-24.04, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 'pypy-3.9', OS: ubuntu-24.04, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 'pypy-3.10', OS: ubuntu-24.04, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 3.8, OS: ${{ env.RUNNER_VERSION }}, NAME: "CPython 3.8 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 3.9, OS: ${{ env.RUNNER_VERSION }}, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.10", OS: ${{ env.RUNNER_VERSION }}, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.11", OS: ${{ env.RUNNER_VERSION }}, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.7', OS: ${{ env.RUNNER_VERSION }}, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.8', OS: ${{ env.RUNNER_VERSION }}, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.9', OS: ${{ env.RUNNER_VERSION }}, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.10', OS: ${{ env.RUNNER_VERSION }}, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
